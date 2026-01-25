@@ -96,23 +96,52 @@ type:airport country:france
 
 ### Supported Asset Types
 
-- `telecom` / `tower` - Telecommunications towers
+**Infrastructure**
+- `telecom` / `tower` / `antenna` / `mast` - Telecommunications
 - `data_center` - Data centers
-- `power_plant` - Power generation facilities
-- `substation` - Electrical substations
-- `airport` - Airports
-- `helipad` - Helipads
-- `port` / `harbour` - Ports and harbours
-- `warehouse` - Warehouses
-- `railyard` - Rail yards
-- `pipeline` - Pipelines
-- `solar` / `wind` / `nuclear` - Renewable/nuclear facilities
+- `power_plant` / `substation` - Power infrastructure
+- `solar` / `wind` / `nuclear` - Energy generation
 - `dam` - Dams
-- `military` - Military installations
-- `hospital` - Hospitals
-- `prison` - Prisons
-- `embassy` - Embassies
-- `factory` / `industrial` - Industrial facilities
+- `pipeline` / `refinery` - Oil and gas
+- `oil_well` / `gas_well` - Extraction
+- `storage_tank` / `silo` / `gasometer` - Storage
+- `cooling_tower` / `chimney` - Industrial structures
+- `water_tower` / `water_treatment` / `wastewater` - Water infrastructure
+
+**Transportation**
+- `airport` / `helipad` / `airfield` - Aviation
+- `port` / `harbour` / `ferry_terminal` - Maritime
+- `train_station` / `railyard` / `metro` - Rail
+- `bus_station` / `parking` - Ground transport
+- `bridge` / `tunnel` - Crossings
+
+**Commercial & Industrial**
+- `warehouse` / `factory` / `industrial` - Industrial
+- `quarry` / `mine` / `landfill` - Extraction/disposal
+- `fuel` / `gas_station` / `charging_station` - Fuel/energy retail
+
+**Government & Military**
+- `military` / `bunker` / `barracks` / `naval_base` - Military
+- `embassy` / `courthouse` / `border_control` - Government
+- `police` / `fire_station` / `prison` - Public safety
+- `checkpoint` / `range` - Security
+
+**Education & Culture**
+- `school` / `university` / `college` - Education
+- `library` / `museum` / `theatre` / `cinema` - Culture
+- `stadium` - Sports
+
+**Healthcare**
+- `hospital` / `clinic` / `pharmacy` - Medical
+- `dentist` / `veterinary` - Specialized care
+
+**Other**
+- `bank` / `atm` / `post_office` - Services
+- `hotel` - Accommodation
+- `church` / `mosque` / `temple` / `synagogue` - Religious
+- `cemetery` - Memorial
+- `lighthouse` / `observatory` / `radar` - Monitoring
+- `crane` / `windmill` / `watermill` - Mechanical
 
 ## Development
 
