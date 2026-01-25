@@ -28,8 +28,8 @@ const TYPE_PATTERNS = [
   { pattern: /\bindustrial\s*(?:zone|area|park)s?\b/i, type: 'industrial' }
 ];
 
-const NEAR_PATTERN = /\bnear\s+(.+?)(?:\s+(?:in|within|radius|$))/i;
-const IN_PATTERN = /\bin\s+(.+?)(?:\s+(?:near|within|$)|$)/i;
+const NEAR_PATTERN = /\bnear\s+(.+?)(?:\s+(?:in|within|radius)|$)/i;
+const IN_PATTERN = /\bin\s+(.+?)(?:\s+(?:near|within)|$)/i;
 const RADIUS_PATTERN = /(?:within|radius)\s*[:=]?\s*(\d+)\s*(?:km|kilometers?|kilometres?)?/i;
 
 function isStructuredQuery(query: string): boolean {
