@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, Suspense, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import SearchBar from "@/components/SearchBar";
+import ShareButton from "@/components/ShareButton";
 import Filters from "@/components/Filters";
 import ResultList from "@/components/ResultList";
 import type { SearchResult, SearchError } from "@/lib/types";
@@ -25,18 +27,14 @@ const INITIAL_QUERIES = [
   "bridges in new york",
 ];
 
-// Custom hook to detect screen size
+/** Custom hook to detect screen size breakpoints */
 function useBreakpoint() {
-  const [breakpoint, setBreakpoint] = useState<"mobile" | "tablet" | "desktop">(
-    "desktop",
-  );
+  const [breakpoint, setBreakpoint] = useState<"mobile" | "desktop">("desktop");
 
   useEffect(() => {
     const checkBreakpoint = () => {
-      if (window.innerWidth <= 768) {
+      if (window.innerWidth <= 1024) {
         setBreakpoint("mobile");
-      } else if (window.innerWidth <= 1024) {
-        setBreakpoint("tablet");
       } else {
         setBreakpoint("desktop");
       }
@@ -50,69 +48,124 @@ function useBreakpoint() {
   return breakpoint;
 }
 
+/** Sanitize and validate a query string */
+function sanitizeQuery(query: string): string | null {
+  const sanitized = query
+    .trim()
+    .slice(0, 500)
+    .replace(/[\x00-\x1F\x7F]/g, "");
+  return sanitized.length > 0 ? sanitized : null;
+}
+
 export default function Home() {
+  return (
+    <Suspense fallback={<div className="app-loading">Loading...</div>}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Search state
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [currentQuery, setCurrentQuery] = useState<string>("");
+  const [initialQuery, setInitialQuery] = useState<string>("");
+
+  // Selection and filters
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filterOperator, setFilterOperator] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string | null>(null);
-  const [mobileTab, setMobileTab] = useState<MobileTab>("map");
-  const [initialQuery, setInitialQuery] = useState<string>("");
 
+  // UI state
+  const [mobileTab, setMobileTab] = useState<MobileTab>("map");
   const breakpoint = useBreakpoint();
+
+  // Refs for URL sync
+  const isInitialMount = useRef(true);
+  const lastUrlQuery = useRef<string | null>(null);
 
   // Update default tab based on breakpoint
   useEffect(() => {
-    if (breakpoint === "tablet") {
-      // On tablet, default to results since filters are visible in sidebar
-      setMobileTab("results");
-    } else if (breakpoint === "mobile") {
-      // On mobile, default to map
+    if (breakpoint === "mobile") {
       setMobileTab("map");
     }
   }, [breakpoint]);
 
-  const handleSearch = useCallback(async (query: string) => {
-    setLoading(true);
-    setError(null);
-    setSelectedId(null);
-    setFilterOperator(null);
-    setFilterType(null);
+  // Core search function
+  const handleSearch = useCallback(
+    async (query: string, updateUrl = true) => {
+      setLoading(true);
+      setError(null);
+      setSelectedId(null);
+      setFilterOperator(null);
+      setFilterType(null);
+      setCurrentQuery(query);
 
-    try {
-      const response = await fetch("/api/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorData = data as SearchError;
-        setError(errorData.error);
-        setSearchResult(null);
-      } else {
-        setSearchResult(data as SearchResult);
-        setError(null);
+      if (updateUrl) {
+        const params = new URLSearchParams();
+        params.set("q", query);
+        router.push(`?${params.toString()}`, { scroll: false });
       }
-    } catch {
-      setError("Network error. Please check your connection.");
-      setSearchResult(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
-  // Load a random query on first mount
+      try {
+        const response = await fetch("/api/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setError((data as SearchError).error);
+          setSearchResult(null);
+        } else {
+          setSearchResult(data as SearchResult);
+          setError(null);
+        }
+      } catch {
+        setError("Network error. Please check your connection.");
+        setSearchResult(null);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [router],
+  );
+
+  // Handle URL query parameter on mount and browser navigation
   useEffect(() => {
+    const urlQuery = searchParams.get("q");
+
+    // Skip if URL hasn't changed (prevents unnecessary re-fetches)
+    if (urlQuery === lastUrlQuery.current && !isInitialMount.current) {
+      return;
+    }
+    lastUrlQuery.current = urlQuery;
+    isInitialMount.current = false;
+
+    if (urlQuery) {
+      const sanitized = sanitizeQuery(urlQuery);
+      if (sanitized) {
+        setInitialQuery(sanitized);
+        handleSearch(sanitized, false);
+        return;
+      }
+    }
+
+    // No valid query - load random default
     const randomQuery =
       INITIAL_QUERIES[Math.floor(Math.random() * INITIAL_QUERIES.length)];
     setInitialQuery(randomQuery);
-    handleSearch(randomQuery);
-  }, [handleSearch]);
+    handleSearch(randomQuery, true);
+  }, [searchParams, handleSearch]);
 
+  // Selection handler
   const handleSelect = useCallback((id: string) => {
     setSelectedId((prev) => (prev === id ? null : id));
   }, []);
@@ -155,6 +208,7 @@ export default function Home() {
           />
 
           <div className="header-meta">
+            <ShareButton query={currentQuery} disabled={loading} />
             <a
               href="https://github.com/ni5arga/sightline"
               target="_blank"

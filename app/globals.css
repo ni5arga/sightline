@@ -91,6 +91,91 @@ body {
   flex-shrink: 0;
 }
 
+.share-button-wrapper {
+  position: relative;
+}
+
+.share-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  border: 1px solid var(--border-primary);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.share-button:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.12);
+}
+
+.share-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.share-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.share-button:focus {
+  outline: 2px solid rgba(88, 166, 255, 0.35);
+  outline-offset: 2px;
+}
+
+.share-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: color 0.15s ease;
+}
+
+.share-button:hover:not(:disabled) .share-icon {
+  color: var(--accent);
+}
+
+.share-button.copied {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.share-button.copied .share-icon {
+  color: #22c55e;
+}
+
+.share-button.copied .share-text {
+  color: #22c55e;
+}
+
+.share-button.error {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.share-button.error .share-icon {
+  color: #ef4444;
+}
+
+.share-button.error .share-text {
+  color: #ef4444;
+}
+
+.share-text {
+  letter-spacing: -0.01em;
+}
+
 .header-link {
   display: inline-flex;
   align-items: center;
@@ -98,7 +183,7 @@ body {
   background: var(--bg-tertiary);
   color: var(--text-primary);
   text-decoration: none;
-  font-size: 13px;
+  font-size: 14px;
   padding: 8px 12px;
   border-radius: 6px;
   font-weight: 600;
@@ -201,7 +286,7 @@ body {
   border: 1px solid var(--border-primary);
   border-radius: 4px;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 14px;
   font-family: ui-monospace, SFMono-Regular, monospace;
   pointer-events: none;
 }
@@ -239,7 +324,7 @@ body {
 .examples-header {
   padding: 4px 8px;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -253,7 +338,7 @@ body {
   border: none;
   border-radius: 6px;
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 14px;
   text-align: left;
   cursor: pointer;
   transition: background 0.15s;
@@ -275,7 +360,7 @@ body {
   padding: 8px;
   margin-top: 4px;
   border-top: 1px solid var(--border-secondary);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-muted);
 }
 
@@ -307,7 +392,7 @@ body {
 .suggestions-header {
   padding: 4px 8px;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -324,7 +409,7 @@ body {
   border: none;
   border-radius: 6px;
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 14px;
   text-align: left;
   cursor: pointer;
   transition: background 0.15s;
@@ -371,7 +456,7 @@ body {
 }
 
 .suggestion-description {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-muted);
   flex-shrink: 0;
 }
@@ -384,7 +469,7 @@ body {
   background: rgba(248, 81, 73, 0.1);
   border-bottom: 1px solid rgba(248, 81, 73, 0.3);
   color: var(--error);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .error-icon {
@@ -395,7 +480,7 @@ body {
 
 .app-main {
   display: grid;
-  grid-template-columns: 240px 1fr 1fr;
+  grid-template-columns: 240px 1fr 45%; /* Filters, Results (55%), Map (45%) */
   flex: 1;
   overflow: hidden;
 }
@@ -414,7 +499,18 @@ body {
   background: var(--bg-secondary);
   border-right: 1px solid var(--border-primary);
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px 0;
+  height: 100%;
+  min-height: 0; /* Required for scroll in grid/flex context */
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE/Edge */
+}
+
+.filters-panel::-webkit-scrollbar {
+  display: none !important; /* Chrome/Safari/Opera */
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .filters-empty {
@@ -448,7 +544,7 @@ body {
 }
 
 .filters-title {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -456,7 +552,7 @@ body {
 }
 
 .filters-count {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--accent);
   font-family: ui-monospace, SFMono-Regular, monospace;
@@ -478,7 +574,7 @@ body {
   border: none;
   border-radius: 6px;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 14px;
   text-align: left;
   cursor: pointer;
   transition:
@@ -505,7 +601,7 @@ body {
 
 .filter-count {
   font-family: ui-monospace, SFMono-Regular, monospace;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-muted);
   flex-shrink: 0;
 }
@@ -518,7 +614,7 @@ body {
   background: var(--bg-tertiary);
   border-radius: 6px;
   font-family: ui-monospace, SFMono-Regular, monospace;
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .query-param {
@@ -553,7 +649,7 @@ body {
   border-radius: 4px;
   color: var(--accent);
   font-family: ui-monospace, SFMono-Regular, monospace;
-  font-size: 11px;
+  font-size: 14px;
   outline: none;
 }
 
@@ -569,7 +665,7 @@ body {
 
 .radius-unit {
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .radius-apply {
@@ -578,7 +674,7 @@ body {
   border: none;
   border-radius: 4px;
   color: var(--bg-primary);
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.15s;
@@ -618,7 +714,7 @@ body {
 }
 
 .results-empty-hint {
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 4px;
 }
 
@@ -633,7 +729,7 @@ body {
 }
 
 .results-count {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-muted);
   font-family: ui-monospace, SFMono-Regular, monospace;
 }
@@ -715,7 +811,7 @@ body {
 }
 
 .result-type {
-  font-size: 11px;
+  font-size: 14px;
   padding: 2px 6px;
   background: var(--bg-tertiary);
   border-radius: 4px;
@@ -725,7 +821,7 @@ body {
 }
 
 .result-operator {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-secondary);
   margin-bottom: 4px;
 }
@@ -736,7 +832,7 @@ body {
 }
 
 .result-coords {
-  font-size: 11px;
+  font-size: 14px;
   font-family: ui-monospace, SFMono-Regular, monospace;
   color: var(--text-muted);
   margin-bottom: 4px;
@@ -783,7 +879,8 @@ body {
   height: 100%;
 }
 
-.map-loading {
+.map-loading,
+.app-loading {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -791,6 +888,10 @@ body {
   height: 100%;
   background: var(--bg-primary);
   color: var(--text-muted);
+}
+
+.app-loading {
+  min-height: 100vh;
 }
 
 .map-overlay {
@@ -803,7 +904,7 @@ body {
   border: 1px solid var(--border-primary);
   border-radius: 8px;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .leaflet-container {
@@ -861,9 +962,16 @@ body {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
+.dark-popup .leaflet-popup-tip-container {
+  margin-top: -1px;
+}
+
 .dark-popup .leaflet-popup-tip {
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
+  border-top: none;
+  border-left: none;
+  box-shadow: none;
 }
 
 .dark-popup .leaflet-popup-close-button {
@@ -876,7 +984,7 @@ body {
 
 .map-popup {
   min-width: 200px;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .popup-title {
@@ -890,7 +998,7 @@ body {
   padding: 2px 6px;
   background: var(--bg-tertiary);
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 14px;
   font-family: ui-monospace, SFMono-Regular, monospace;
   color: var(--text-secondary);
   margin-bottom: 8px;
@@ -903,14 +1011,14 @@ body {
 
 .popup-coords {
   font-family: ui-monospace, SFMono-Regular, monospace;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-muted);
   margin-bottom: 8px;
 }
 
 .popup-tags {
   width: 100%;
-  font-size: 11px;
+  font-size: 14px;
   margin-bottom: 8px;
   border-collapse: collapse;
 }
@@ -936,7 +1044,7 @@ body {
   border-radius: 4px;
   color: var(--accent);
   text-decoration: none;
-  font-size: 11px;
+  font-size: 14px;
   transition: background 0.15s;
 }
 
@@ -953,10 +1061,10 @@ body {
    - xs: < 480px (Mobile phones)
    ============================================ */
 
-/* Large Desktop (xl) - 3 column layout */
+/* Large Desktop (xl) - 3 column layout: Filters + Results (55%) | Map (45%) */
 @media (min-width: 1280px) {
   .app-main {
-    grid-template-columns: 280px 1fr 1.5fr;
+    grid-template-columns: 280px 1fr 45%;
   }
 
   .filter-name {
@@ -967,7 +1075,7 @@ body {
 /* Small Desktop/Laptop (lg) - 3 column layout with smaller filters */
 @media (max-width: 1279px) and (min-width: 1025px) {
   .app-main {
-    grid-template-columns: 240px 1fr 1fr;
+    grid-template-columns: 200px 1fr 45%; /* Filters (smaller), Results (55%), Map (45%) */
   }
 
   .header-link-text {
@@ -979,108 +1087,8 @@ body {
   }
 }
 
-/* Tablet (md) - 2 column layout with toggle for map/results */
-@media (max-width: 1024px) and (min-width: 769px) {
-  .app-header {
-    padding: 0 12px;
-  }
-
-  .header-content {
-    gap: 16px;
-  }
-
-  .header-link-text {
-    display: none;
-  }
-
-  .header-link {
-    padding: 8px;
-  }
-
-  .app-main {
-    grid-template-columns: 200px 1fr;
-  }
-
-  .panel-map {
-    display: none;
-  }
-
-  .panel-map.mobile-active {
-    display: block;
-  }
-
-  .panel-results {
-    display: none;
-  }
-
-  .panel-results.mobile-active {
-    display: block;
-  }
-
-  /* Show toggle between map and results on tablet */
-  .mobile-nav {
-    display: flex;
-    background: var(--bg-secondary);
-    border-top: 1px solid var(--border-primary);
-    padding: 6px 0;
-    flex-shrink: 0;
-  }
-
-  .mobile-nav-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px;
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition:
-      color 0.15s,
-      background 0.15s;
-    border-radius: 6px;
-    margin: 0 4px;
-  }
-
-  .mobile-nav-btn svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .mobile-nav-btn.active {
-    color: var(--accent);
-    background: rgba(88, 166, 255, 0.1);
-  }
-
-  .mobile-nav-btn:hover {
-    background: var(--bg-hover);
-  }
-
-  /* Hide filters tab on tablet - always visible in sidebar */
-  .mobile-nav-btn:nth-child(3) {
-    display: none;
-  }
-
-  .filter-name {
-    max-width: 120px;
-  }
-
-  .filters-section {
-    padding: 0 12px;
-  }
-
-  .search-container {
-    max-width: 400px;
-  }
-}
-
-/* Mobile (sm + xs) - Single column with bottom navigation */
-@media (max-width: 768px) {
+/* Mobile + Tablet (sm + md) - Single column with bottom navigation */
+@media (max-width: 1024px) {
   .app-header {
     padding: 0 12px;
     height: 52px;
@@ -1095,6 +1103,18 @@ body {
   }
 
   .header-meta {
+    display: flex;
+  }
+
+  .header-meta .header-link {
+    display: none;
+  }
+
+  .share-button {
+    padding: 8px;
+  }
+
+  .share-text {
     display: none;
   }
 
@@ -1139,6 +1159,8 @@ body {
     flex: 1;
     border: none;
     width: 100%;
+    overflow-y: auto;
+    min-height: 0; /* Important for flex scroll */
   }
 
   .filters-panel {
@@ -1187,15 +1209,15 @@ body {
     background: none;
     border: none;
     color: var(--text-muted);
-    font-size: 10px;
+    font-size: 16px;
     cursor: pointer;
     transition: color 0.15s;
     border-radius: 8px;
   }
 
   .mobile-nav-btn svg {
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
   }
 
   .mobile-nav-btn.active {
@@ -1209,7 +1231,7 @@ body {
 
   .error-banner {
     padding: 8px 12px;
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .result-item {
@@ -1221,7 +1243,7 @@ body {
   }
 
   .result-name {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .search-examples {
@@ -1246,7 +1268,7 @@ body {
 
   /* Query debug section on mobile */
   .query-debug {
-    font-size: 10px;
+    font-size: 14px;
   }
 
   .query-param {
@@ -1261,11 +1283,11 @@ body {
   /* Map popup adjustments for mobile */
   .map-popup {
     min-width: 180px;
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .popup-title {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   /* Leaflet controls on mobile */
@@ -1297,7 +1319,7 @@ body {
   .search-input {
     height: 38px;
     padding-left: 36px;
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .search-icon {
@@ -1313,12 +1335,12 @@ body {
   .mobile-nav-btn {
     padding: 6px 2px;
     gap: 2px;
-    font-size: 9px;
+    font-size: 12px;
   }
 
   .mobile-nav-btn svg {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
   }
 
   .result-item {
@@ -1327,17 +1349,17 @@ body {
   }
 
   .result-name {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .result-type {
-    font-size: 10px;
+    font-size: 14px;
     padding: 1px 4px;
   }
 
   .result-operator,
   .result-coords {
-    font-size: 10px;
+    font-size: 14px;
   }
 
   .filters-section {
@@ -1346,11 +1368,11 @@ body {
 
   .filter-item {
     padding: 8px 6px;
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .filters-title {
-    font-size: 10px;
+    font-size: 14px;
   }
 
   .search-examples,
@@ -1363,7 +1385,7 @@ body {
   .example-item,
   .suggestion-item {
     padding: 10px;
-    font-size: 12px;
+    font-size: 14px;
   }
 }
 
@@ -1385,11 +1407,12 @@ body {
     flex-direction: row;
     gap: 6px;
     padding: 6px 12px;
+    font-size: 14px;
   }
 
   .mobile-nav-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
   }
 
   .search-examples,
