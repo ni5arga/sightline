@@ -1,5 +1,11 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# GitHub configuration (local only)
+.github/
+
+# Agent skills (local only)
+.agents/
+
 # dependencies
 /node_modules
 /.pnp
@@ -19,10 +25,14 @@
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
 *.pem
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
 # debug
 npm-debug.log*
@@ -32,6 +42,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # vercel
 .vercel
@@ -39,3 +53,35 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+*~
+
+# OS generated files
+*.DS_Store
+.Spotlight-V100
+.Trashes
+
+# Logs
+logs
+*.log
+
+# Cache
+.cache
+.eslintcache
+
+# Optional npm cache directory
+.npm
+
+# Sightline specific
+/data/
+*.geojson
+*.osm
+/.github/
+skills/
