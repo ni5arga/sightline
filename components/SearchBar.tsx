@@ -183,15 +183,15 @@ export default function SearchBar({
   const containerRef = useRef<HTMLDivElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const prevInitialQueryRef = useRef(initialQuery);
+  const hasUserInteracted = useRef(false);
 
   // Sync query state when initialQuery prop changes (using ref to avoid cascading renders)
   useEffect(() => {
     if (initialQuery && initialQuery !== prevInitialQueryRef.current) {
       prevInitialQueryRef.current = initialQuery;
-      // Use a microtask to avoid synchronous setState in effect
+      hasUserInteracted.current = false;
       queueMicrotask(() => setQuery(initialQuery));
-    } else if (initialQuery && !query) {
-      // Initial mount with initialQuery
+    } else if (initialQuery && !query && !hasUserInteracted.current) {
       queueMicrotask(() => setQuery(initialQuery));
     }
   }, [initialQuery, query]);
@@ -358,6 +358,7 @@ export default function SearchBar({
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
+      hasUserInteracted.current = true;
       setQuery(value);
       setShowSuggestions(value.trim().length > 0);
       setShowExamples(false);
