@@ -123,8 +123,13 @@ export default function MapView({
       });
 
       marker.bindPopup(createPopupContent(asset), {
-        maxWidth: 300,
+        maxWidth: typeof window !== 'undefined' && window.innerWidth < 768 ? Math.min(window.innerWidth - 60, 280) : 300,
+        minWidth: typeof window !== 'undefined' && window.innerWidth < 768 ? Math.min(window.innerWidth - 60, 250) : 200,
+        maxHeight: typeof window !== 'undefined' && window.innerWidth < 768 ? Math.floor(window.innerHeight * 0.5) : 400,
         className: "dark-popup",
+        autoPan: true,
+        autoPanPadding: [30, 80],
+        keepInView: true,
       });
 
       marker.on("click", () => {

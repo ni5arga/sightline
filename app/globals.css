@@ -1021,20 +1021,28 @@ body {
   font-size: 14px;
   margin-bottom: 8px;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .popup-tags td {
   padding: 2px 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .popup-key {
   color: var(--text-muted);
-  padding-right: 12px;
+  padding-right: 8px;
   font-family: ui-monospace, SFMono-Regular, monospace;
+  white-space: nowrap;
+  width: 80px;
+  vertical-align: top;
 }
 
 .popup-value {
   color: var(--text-secondary);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .popup-osm-link {
@@ -1151,16 +1159,29 @@ body {
   .panel-map.mobile-active {
     display: flex;
     flex-direction: column;
+    position: relative;
+  }
+
+  /* Allow map popups to overflow */
+  .panel-map.mobile-active {
+    overflow: visible;
   }
 
   .panel-filters.mobile-active .filters-panel,
-  .panel-results.mobile-active .results-panel,
-  .panel-map.mobile-active .map-container {
+  .panel-results.mobile-active .results-panel {
     flex: 1;
     border: none;
     width: 100%;
     overflow-y: auto;
     min-height: 0; /* Important for flex scroll */
+  }
+
+  .panel-map.mobile-active .map-container {
+    flex: 1;
+    border: none;
+    width: 100%;
+    min-height: 0;
+    overflow: visible;
   }
 
   .filters-panel {
@@ -1281,13 +1302,92 @@ body {
   }
 
   /* Map popup adjustments for mobile */
+  .dark-popup .leaflet-popup-content-wrapper {
+    max-width: calc(100vw - 60px) !important;
+    width: calc(100vw - 60px) !important;
+    max-height: 50vh;
+    overflow: hidden;
+    box-sizing: border-box !important;
+  }
+
+  .dark-popup .leaflet-popup-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 10px !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: calc(50vh - 30px);
+    box-sizing: border-box !important;
+  }
+
   .map-popup {
-    min-width: 180px;
-    font-size: 14px;
+    width: 100%;
+    max-width: 100%;
+    font-size: 12px;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 
   .popup-title {
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    margin-bottom: 4px;
+  }
+
+  .popup-type {
+    font-size: 11px !important;
+    padding: 2px 4px !important;
+    display: inline-block;
+    word-break: break-all;
+  }
+
+  .popup-operator {
+    font-size: 11px;
+    word-break: break-word;
+  }
+
+  .popup-coords {
+    font-size: 11px;
+    word-break: break-all;
+  }
+
+  .popup-tags {
+    font-size: 11px !important;
+  }
+
+  .popup-key {
+    width: 60px !important;
+    max-width: 60px !important;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .popup-value {
+    font-size: 11px;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+
+  .popup-osm-link {
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+    display: inline-block;
+    word-break: break-all;
+  }
+
+  /* Leaflet popup positioning for mobile */
+  .leaflet-popup {
+    margin-bottom: 20px;
+    z-index: 10000 !important;
+  }
+
+  .leaflet-popup-pane {
+    z-index: 10000 !important;
   }
 
   /* Leaflet controls on mobile */
