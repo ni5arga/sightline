@@ -280,6 +280,7 @@ export default function MapView({
   // Cluster toggle state
   const [showClusters, setShowClusters] = useState(true);
   const prevShowClustersRef = useRef<boolean>(true);
+
   // Core map instance and marker storage
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
