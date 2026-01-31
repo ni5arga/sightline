@@ -984,6 +984,185 @@ body {
   color: var(--text-secondary) !important;
 }
 
+/* =============================================================================
+   LAYER CONTROL STYLING
+   ============================================================================= */
+
+.leaflet-control-layers {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-primary) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  overflow: hidden;
+  z-index: 1000 !important;
+}
+
+.leaflet-control-layers-toggle {
+  background-color: var(--bg-secondary) !important;
+  width: 36px !important;
+  height: 36px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23e6edf3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='12 2 2 7 12 12 22 7 12 2'/%3E%3Cpolyline points='2 17 12 22 22 17'/%3E%3Cpolyline points='2 12 12 17 22 12'/%3E%3C/svg%3E") !important;
+  background-size: 18px 18px !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-radius: 8px !important;
+  transition: background-color 0.15s ease !important;
+  cursor: pointer !important;
+}
+
+.leaflet-control-layers-toggle:hover,
+.leaflet-control-layers-toggle:focus {
+  background-color: var(--bg-hover) !important;
+  outline: none !important;
+}
+
+.leaflet-control-layers-toggle:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px !important;
+}
+
+.leaflet-control-layers-expanded {
+  padding: 0 !important;
+  background: var(--bg-secondary) !important;
+}
+
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+  display: none;
+}
+
+.leaflet-control-layers-list {
+  padding: 8px 4px !important;
+}
+
+.leaflet-control-layers-base,
+.leaflet-control-layers-overlays {
+  padding: 0 !important;
+}
+
+.leaflet-control-layers-base label,
+.leaflet-control-layers-overlays label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 12px !important;
+  margin: 2px 4px !important;
+  color: var(--text-primary) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  border-radius: 6px !important;
+  transition: background-color 0.15s ease !important;
+  background: transparent !important;
+  pointer-events: auto !important;
+  user-select: none !important;
+}
+
+.leaflet-control-layers-base label:hover,
+.leaflet-control-layers-overlays label:hover {
+  background: var(--bg-hover) !important;
+}
+
+.leaflet-control-layers-base label:focus-within,
+.leaflet-control-layers-overlays label:focus-within {
+  background: var(--bg-hover) !important;
+  outline: 2px solid var(--accent) !important;
+  outline-offset: -2px !important;
+}
+
+.leaflet-control-layers-base label span,
+.leaflet-control-layers-overlays label span {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+/* Custom radio button styling */
+.leaflet-control-layers-selector {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  border: 2px solid var(--border-secondary) !important;
+  border-radius: 50% !important;
+  margin: 0 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+  pointer-events: auto !important;
+  background: transparent !important;
+}
+
+.leaflet-control-layers-selector:hover {
+  border-color: var(--accent) !important;
+}
+
+.leaflet-control-layers-selector:focus {
+  outline: none !important;
+}
+
+.leaflet-control-layers-selector:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--bg-secondary),
+    0 0 0 4px var(--accent) !important;
+}
+
+.leaflet-control-layers-selector:checked {
+  border-color: var(--accent) !important;
+  background: var(--accent) !important;
+  box-shadow: inset 0 0 0 3px var(--bg-secondary) !important;
+}
+
+.leaflet-control-layers-separator {
+  border-top: 1px solid var(--border-primary) !important;
+  margin: 6px 8px !important;
+}
+
+/* Mobile touch-friendly adjustments */
+@media (max-width: 768px) {
+  .leaflet-control-layers {
+    border-radius: 10px !important;
+  }
+
+  .leaflet-control-layers-toggle {
+    width: 44px !important;
+    height: 44px !important;
+    background-size: 22px 22px !important;
+    border-radius: 10px !important;
+  }
+
+  .leaflet-control-layers-base label,
+  .leaflet-control-layers-overlays label {
+    padding: 12px 16px !important;
+    font-size: 15px !important;
+    min-height: 44px !important;
+  }
+
+  .leaflet-control-layers-selector {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+  }
+
+  .leaflet-control-layers-list {
+    padding: 8px 6px !important;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .leaflet-control-layers-toggle,
+  .leaflet-control-layers-base label,
+  .leaflet-control-layers-overlays label,
+  .leaflet-control-layers-selector {
+    transition: none !important;
+  }
+}
+
 .marker-default .marker-pin,
 .marker-selected .marker-pin {
   width: 100%;
