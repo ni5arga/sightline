@@ -14,10 +14,6 @@ interface MapViewProps {
   filterType: string | null;
 }
 
-// =============================================================================
-// CONSTANTS
-// =============================================================================
-
 /** Escape HTML to prevent XSS in popup content */
 function escapeHtml(text: string): string {
   const div = document.createElement("div");
@@ -367,9 +363,9 @@ export default function MapView({
     `;
   }, []);
 
-  // =============================================================================
-  // EFFECT: Create and manage markers (independent of selection)
-  // =============================================================================
+  
+  // Effect: Create and manage markers (independent of selection)
+
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -422,13 +418,18 @@ export default function MapView({
       currentMarkers.set(asset.id, marker);
     });
 
-    // Fit bounds if we have results
+    // Fly to bounds with smooth animation if we have results
     if (bounds && filteredResults.length > 0) {
       const latLngBounds = L.latLngBounds(
         [bounds[0], bounds[2]],
         [bounds[1], bounds[3]],
       );
-      map.fitBounds(latLngBounds, { padding: [50, 50], maxZoom: 12 });
+      map.flyToBounds(latLngBounds, {
+        padding: [50, 50],
+        maxZoom: 12,
+        duration: 1.2,
+        easeLinearity: 0.25,
+      });
     }
 
     // Cleanup function - uses captured currentMarkers variable
@@ -439,9 +440,8 @@ export default function MapView({
     };
   }, [filteredResults, bounds, onSelect, createPopupContent]);
 
-  // =============================================================================
-  // EFFECT: Handle selection changes (update icons and popups)
-  // =============================================================================
+
+  // Effect: Handle selection changes (update icons and popups)
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
