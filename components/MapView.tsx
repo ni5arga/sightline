@@ -781,13 +781,13 @@ export default function MapView({
 
   return (
     <div className="map-container">
-      {/* Cluster toggle below the layer selector (topleft) */}
+      {/* Cluster toggle in bottom-left corner */}
       <div
         style={{
           position: "absolute",
           zIndex: 401,
           left: 12,
-          top: 62,
+          bottom: 12,
           minWidth: 0,
           background: "#0e0e0e",
           borderRadius: 4,
