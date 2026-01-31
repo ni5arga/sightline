@@ -1,8 +1,19 @@
 "use client";
 
+/**
+ * MapView Component
+ *
+ * Interactive map display with marker clustering optimized for large datasets (10K+ markers).
+ * Uses Leaflet with leaflet.markercluster for performance. Features adaptive configuration
+ * based on dataset size, lazy popup rendering, and graceful degradation for tile failures.
+ */
+
 import { useEffect, useRef, useCallback, useMemo } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import type { Asset } from "@/lib/types";
 
 interface MapViewProps {
@@ -14,7 +25,7 @@ interface MapViewProps {
   filterType: string | null;
 }
 
-/** Escape HTML to prevent XSS in popup content */
+/** Escapes HTML entities to prevent XSS in dynamically generated popup content. */
 function escapeHtml(text: string): string {
   const div = document.createElement("div");
   div.textContent = text;
@@ -117,6 +128,123 @@ const DEFAULT_CENTER: L.LatLngExpression = [20, 0];
 const DEFAULT_ZOOM = 2;
 const SELECTED_ZOOM = 14;
 
+/**
+ * Adaptive clustering thresholds.
+ * Performance settings scale based on marker count to balance responsiveness with visual quality.
+ */
+const CLUSTER_THRESHOLDS = {
+  SMALL: 100,
+  MEDIUM: 1000,
+  LARGE: 10000,
+  MASSIVE: 50000,
+} as const;
+
+interface ClusterConfig {
+  readonly chunkInterval: number;
+  readonly chunkDelay: number;
+  readonly maxClusterRadius: number;
+  readonly disableClusteringAtZoom: number;
+  readonly animate: boolean;
+  readonly animateAddingMarkers: boolean;
+  readonly spiderfyDistanceMultiplier: number;
+}
+
+const CLUSTER_CONFIGS: Readonly<Record<string, ClusterConfig>> = Object.freeze({
+  small: {
+    chunkInterval: 100,
+    chunkDelay: 25,
+    maxClusterRadius: 40,
+    disableClusteringAtZoom: 17,
+    animate: true,
+    animateAddingMarkers: true,
+    spiderfyDistanceMultiplier: 1.5,
+  },
+  medium: {
+    chunkInterval: 150,
+    chunkDelay: 50,
+    maxClusterRadius: 50,
+    disableClusteringAtZoom: 18,
+    animate: true,
+    animateAddingMarkers: false,
+    spiderfyDistanceMultiplier: 1.2,
+  },
+  large: {
+    chunkInterval: 200,
+    chunkDelay: 75,
+    maxClusterRadius: 60,
+    disableClusteringAtZoom: 19,
+    animate: true,
+    animateAddingMarkers: false,
+    spiderfyDistanceMultiplier: 1,
+  },
+  massive: {
+    chunkInterval: 300,
+    chunkDelay: 100,
+    maxClusterRadius: 80,
+    disableClusteringAtZoom: 19,
+    animate: false,
+    animateAddingMarkers: false,
+    spiderfyDistanceMultiplier: 0.8,
+  },
+});
+
+/** Returns optimized cluster settings based on dataset size for best performance/UX balance. */
+function getClusterConfig(markerCount: number): ClusterConfig {
+  if (markerCount < CLUSTER_THRESHOLDS.SMALL) {
+    return CLUSTER_CONFIGS.small;
+  } else if (markerCount < CLUSTER_THRESHOLDS.MEDIUM) {
+    return CLUSTER_CONFIGS.medium;
+  } else if (markerCount < CLUSTER_THRESHOLDS.LARGE) {
+    return CLUSTER_CONFIGS.large;
+  }
+  return CLUSTER_CONFIGS.massive;
+}
+
+/** Validates geographic coordinates to prevent invalid markers from corrupting the map state. */
+function isValidCoordinate(lat: number, lon: number): boolean {
+  return (
+    typeof lat === "number" &&
+    typeof lon === "number" &&
+    !Number.isNaN(lat) &&
+    !Number.isNaN(lon) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lon >= -180 &&
+    lon <= 180
+  );
+}
+
+/** Formats large numbers for cluster display (e.g., 1.2K, 15K, 1.5M) to improve readability. */
+function formatClusterCount(count: number): string {
+  if (count < 1000) {
+    return String(count);
+  } else if (count < 10000) {
+    return `${(count / 1000).toFixed(1)}K`;
+  } else if (count < 1000000) {
+    return `${Math.round(count / 1000)}K`;
+  } else {
+    return `${(count / 1000000).toFixed(1)}M`;
+  }
+}
+
+type ClusterSize = "small" | "medium" | "large" | "xlarge";
+
+function getClusterSize(count: number): ClusterSize {
+  if (count < 10) return "small";
+  if (count < 100) return "medium";
+  if (count < 1000) return "large";
+  return "xlarge";
+}
+
+const CLUSTER_DIMENSIONS: Readonly<Record<ClusterSize, number>> = Object.freeze(
+  {
+    small: 30,
+    medium: 40,
+    large: 50,
+    xlarge: 60,
+  },
+);
+
 const defaultIcon = L.divIcon({
   className: "marker-default",
   html: '<div class="marker-pin"></div>',
@@ -141,20 +269,24 @@ export default function MapView({
   filterOperator,
   filterType,
 }: MapViewProps) {
+  // Core map instance and marker storage
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
+  const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Tile layer management
   const layerControlRef = useRef<L.Control.Layers | null>(null);
   const tileLayersRef = useRef<Map<string, L.TileLayer>>(new Map());
   const activeLayerRef = useRef<string>("osm");
 
-  // Track the source of selection to differentiate marker clicks from external selections
+  // Lifecycle tracking
+  const isMapMountedRef = useRef<boolean>(true);
+
+  // Selection state tracking to differentiate user clicks from programmatic selection
   const selectionSourceRef = useRef<"marker" | "external" | null>(null);
-  // Track previous selectedId to detect actual selection changes
   const prevSelectedIdRef = useRef<string | null>(null);
-  // Track if we've already navigated to the selected marker (prevents re-flying on pan)
   const hasNavigatedToSelectionRef = useRef<boolean>(false);
-  // Track if user is actively interacting with the map (prevents auto-navigation interruption)
   const userInteractingRef = useRef<boolean>(false);
 
   const filteredResults = useMemo(() => {
@@ -171,8 +303,12 @@ export default function MapView({
     return filtered;
   }, [results, filterOperator, filterType]);
 
+  // Map initialization effect - runs once on mount
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+
+    // Reset mounted flag for re-mount scenarios (React Strict Mode, hot reload)
+    isMapMountedRef.current = true;
 
     const map = L.map(containerRef.current, {
       center: DEFAULT_CENTER,
@@ -181,7 +317,6 @@ export default function MapView({
       attributionControl: true,
     });
 
-    // Helper to create tile layer with error handling and fallback
     const createTileLayer = (key: string, config: LayerConfig): L.TileLayer => {
       const layer = L.tileLayer(config.url, {
         attribution: config.attribution,
@@ -191,13 +326,12 @@ export default function MapView({
         crossOrigin: "anonymous",
       });
 
-      // Handle tile loading errors with fallback
+      // Automatic fallback: switch to backup tile server after repeated failures
       let errorCount = 0;
       let hasSwitchedToFallback = false;
 
       layer.on("tileerror", () => {
         errorCount++;
-        // Switch to fallback URL after threshold, but only once
         if (
           errorCount >= TILE_ERROR_THRESHOLD &&
           config.fallbackUrl &&
@@ -205,12 +339,10 @@ export default function MapView({
         ) {
           hasSwitchedToFallback = true;
           layer.setUrl(config.fallbackUrl);
-          // Reset error count for fallback monitoring
           errorCount = 0;
         }
       });
 
-      // Reset error count on successful tile load
       layer.on("tileload", () => {
         errorCount = 0;
       });
@@ -218,20 +350,17 @@ export default function MapView({
       return layer;
     };
 
-    // Create all tile layers
     const tileLayers = new Map<string, L.TileLayer>();
     const baseLayers: Record<string, L.TileLayer> = {};
 
     Object.entries(LAYERS).forEach(([key, config]) => {
       const layer = createTileLayer(key, config);
       tileLayers.set(key, layer);
-      // Use label for layer control
       baseLayers[config.label] = layer;
     });
 
     tileLayersRef.current = tileLayers;
 
-    // Determine which layer to show (from storage or default)
     const storedLayer = getStoredLayerPreference();
     const initialLayerKey =
       storedLayer && tileLayers.has(storedLayer)
@@ -244,7 +373,6 @@ export default function MapView({
       activeLayerRef.current = initialLayerKey;
     }
 
-    // Create layer control with ARIA-friendly options
     const layerControl = L.control.layers(
       baseLayers,
       {},
@@ -257,9 +385,7 @@ export default function MapView({
     layerControl.addTo(map);
     layerControlRef.current = layerControl;
 
-    // Listen for layer changes to persist preference
     const handleBaseLayerChange = (e: L.LayersControlEvent) => {
-      // Find the key for the selected layer by matching label
       for (const [key, config] of Object.entries(LAYERS)) {
         if (e.name === config.label) {
           activeLayerRef.current = key;
@@ -273,36 +399,28 @@ export default function MapView({
 
     map.zoomControl.setPosition("topright");
 
-    // Track user interaction to prevent auto-navigation during pan/zoom
     const handleInteractionStart = () => {
       userInteractingRef.current = true;
     };
     const handleInteractionEnd = () => {
-      // Small delay to allow for continuous interaction detection
       setTimeout(() => {
         userInteractingRef.current = false;
       }, 100);
     };
 
-    // Close popup intelligently when marker leaves viewport after user interaction
-    // This allows small pan adjustments while viewing popup, but closes it when
-    // the user navigates far enough that the marker is no longer visible
     const handleMoveEnd = () => {
       handleInteractionEnd();
 
-      // Check if there's an open popup and if its marker is still visible
+      // Auto-close popups when their marker scrolls out of view
       const openPopup = map
         .getPane("popupPane")
         ?.querySelector(".leaflet-popup");
       if (openPopup) {
-        // Find the marker that has this popup open
         const currentMarkers = markersRef.current;
         for (const [, marker] of currentMarkers) {
           if (marker.isPopupOpen()) {
             const markerLatLng = marker.getLatLng();
             const bounds = map.getBounds();
-
-            // Close popup if marker is outside the visible bounds
             if (!bounds.contains(markerLatLng)) {
               marker.closePopup();
             }
@@ -320,25 +438,29 @@ export default function MapView({
     mapRef.current = map;
 
     return () => {
-      // Clean up all event listeners and layers properly
+      isMapMountedRef.current = false;
       map.off("baselayerchange", handleBaseLayerChange);
       map.off("dragstart", handleInteractionStart);
       map.off("zoomstart", handleInteractionStart);
       map.off("dragend", handleMoveEnd);
       map.off("zoomend", handleMoveEnd);
       tileLayersRef.current.forEach((layer) => {
-        layer.off(); // Remove all layer event listeners
+        layer.off();
         layer.remove();
       });
       tileLayersRef.current.clear();
+      if (markerClusterRef.current) {
+        markerClusterRef.current.clearLayers();
+        markerClusterRef.current = null;
+      }
       map.remove();
       mapRef.current = null;
       layerControlRef.current = null;
     };
   }, []);
 
+  /** Generates popup HTML content with XSS-safe escaping. */
   const createPopupContent = useCallback((asset: Asset): string => {
-    // Escape user-provided content to prevent XSS
     const safeName = escapeHtml(asset.name);
     const safeType = escapeHtml(asset.type);
     const safeOperator = asset.operator ? escapeHtml(asset.operator) : null;
@@ -363,107 +485,189 @@ export default function MapView({
     `;
   }, []);
 
-  
-  // Effect: Create and manage markers (independent of selection)
-
+  // Marker clustering effect - recreates cluster group when results change
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    // Capture current markers ref for cleanup (ESLint react-hooks/exhaustive-deps fix)
     const currentMarkers = markersRef.current;
 
-    // Clear existing markers
+    // Clean up existing cluster group
+    if (markerClusterRef.current) {
+      try {
+        markerClusterRef.current.clearLayers();
+        if (map.hasLayer(markerClusterRef.current)) {
+          map.removeLayer(markerClusterRef.current);
+        }
+      } catch {}
+    }
+
     currentMarkers.forEach((marker) => {
-      marker.off(); // Remove all event listeners
-      marker.remove();
+      try {
+        marker.off();
+      } catch {}
     });
     currentMarkers.clear();
 
-    // Create new markers for filtered results
-    filteredResults.forEach((asset) => {
-      const marker = L.marker([asset.lat, asset.lon], {
-        icon: defaultIcon,
-      });
+    const validResults = filteredResults.filter((asset) =>
+      isValidCoordinate(asset.lat, asset.lon),
+    );
 
-      marker.bindPopup(createPopupContent(asset), {
-        maxWidth:
-          typeof window !== "undefined" && window.innerWidth < 768
-            ? Math.min(window.innerWidth - 60, 280)
-            : 300,
-        minWidth:
-          typeof window !== "undefined" && window.innerWidth < 768
-            ? Math.min(window.innerWidth - 60, 250)
-            : 200,
-        maxHeight:
-          typeof window !== "undefined" && window.innerWidth < 768
-            ? Math.floor(window.innerHeight * 0.5)
-            : 400,
-        className: "dark-popup",
-        autoPan: true,
-        autoPanPadding: [30, 80],
-        // keepInView is disabled to allow free map navigation while a marker is selected
-        // Users can pan anywhere without the map auto-snapping back to the popup
-        keepInView: false,
-      });
-
-      // Handle marker click - mark selection source as "marker"
-      marker.on("click", () => {
-        selectionSourceRef.current = "marker";
-        hasNavigatedToSelectionRef.current = true; // User clicked, so we're already at the marker
-        onSelect(asset.id);
-      });
-
-      marker.addTo(map);
-      currentMarkers.set(asset.id, marker);
-    });
-
-    // Fly to bounds with smooth animation if we have results
-    if (bounds && filteredResults.length > 0) {
-      const latLngBounds = L.latLngBounds(
-        [bounds[0], bounds[2]],
-        [bounds[1], bounds[3]],
-      );
-      map.flyToBounds(latLngBounds, {
-        padding: [50, 50],
-        maxZoom: 12,
-        duration: 1.2,
-        easeLinearity: 0.25,
-      });
+    if (validResults.length === 0) {
+      markerClusterRef.current = null;
+      return;
     }
 
-    // Cleanup function - uses captured currentMarkers variable
+    const config = getClusterConfig(validResults.length);
+
+    const markerCluster = L.markerClusterGroup({
+      chunkedLoading: true,
+      chunkInterval: config.chunkInterval,
+      chunkDelay: config.chunkDelay,
+      showCoverageOnHover: false,
+      spiderfyOnMaxZoom: true,
+      spiderfyDistanceMultiplier: config.spiderfyDistanceMultiplier,
+      disableClusteringAtZoom: config.disableClusteringAtZoom,
+      maxClusterRadius: config.maxClusterRadius,
+      animate: config.animate,
+      animateAddingMarkers: config.animateAddingMarkers,
+      removeOutsideVisibleBounds: true,
+      spiderLegPolylineOptions: {
+        weight: 1.5,
+        color: "#30363d",
+        opacity: 0.6,
+      },
+      iconCreateFunction: (cluster) => {
+        const count = cluster.getChildCount();
+        const size = getClusterSize(count);
+        const dimensions = CLUSTER_DIMENSIONS[size];
+        const formattedCount = formatClusterCount(count);
+
+        return L.divIcon({
+          html: `<div class="cluster-icon" role="img" aria-label="${count} markers in this cluster"><span>${formattedCount}</span></div>`,
+          className: `marker-cluster marker-cluster-${size}`,
+          iconSize: L.point(dimensions, dimensions),
+        });
+      },
+    });
+
+    markerClusterRef.current = markerCluster;
+
+    // Create markers and add to cluster
+    const markersToAdd: L.Marker[] = [];
+
+    for (const asset of validResults) {
+      try {
+        const marker = L.marker([asset.lat, asset.lon], {
+          icon: defaultIcon,
+          keyboard: true,
+        });
+
+        marker.bindPopup(() => createPopupContent(asset), {
+          maxWidth:
+            typeof window !== "undefined" && window.innerWidth < 768
+              ? Math.min(window.innerWidth - 60, 280)
+              : 300,
+          minWidth:
+            typeof window !== "undefined" && window.innerWidth < 768
+              ? Math.min(window.innerWidth - 60, 250)
+              : 200,
+          maxHeight:
+            typeof window !== "undefined" && window.innerWidth < 768
+              ? Math.floor(window.innerHeight * 0.5)
+              : 400,
+          className: "dark-popup",
+          autoPan: true,
+          autoPanPadding: [30, 80],
+          keepInView: false,
+        });
+
+        marker.on("click", () => {
+          if (!isMapMountedRef.current) return;
+          selectionSourceRef.current = "marker";
+          hasNavigatedToSelectionRef.current = true;
+          onSelect(asset.id);
+        });
+
+        markersToAdd.push(marker);
+        currentMarkers.set(asset.id, marker);
+      } catch {
+        if (process.env.NODE_ENV === "development") {
+          console.warn(`Failed to create marker for asset: ${asset.id}`);
+        }
+      }
+    }
+
+    if (markersToAdd.length > 0) {
+      try {
+        markerCluster.addLayers(markersToAdd);
+      } catch {
+        markersToAdd.forEach((marker) => {
+          try {
+            markerCluster.addLayer(marker);
+          } catch {}
+        });
+      }
+    }
+
+    if (markerCluster && isMapMountedRef.current) {
+      map.addLayer(markerCluster);
+    }
+
+    if (bounds && validResults.length > 0) {
+      try {
+        const latLngBounds = L.latLngBounds(
+          [bounds[0], bounds[2]],
+          [bounds[1], bounds[3]],
+        );
+        if (latLngBounds.isValid()) {
+          map.fitBounds(latLngBounds, {
+            padding: [50, 50],
+            maxZoom: 12,
+            animate: validResults.length < CLUSTER_THRESHOLDS.LARGE,
+          });
+        }
+      } catch {}
+    }
+
     return () => {
       currentMarkers.forEach((marker) => {
-        marker.off();
+        try {
+          marker.off();
+        } catch {}
       });
+      if (markerClusterRef.current) {
+        try {
+          markerClusterRef.current.clearLayers();
+          if (map.hasLayer(markerClusterRef.current)) {
+            map.removeLayer(markerClusterRef.current);
+          }
+        } catch {}
+      }
     };
   }, [filteredResults, bounds, onSelect, createPopupContent]);
 
-
-  // Effect: Handle selection changes (update icons and popups)
+  // Selection handling effect - updates marker icons and manages popup/navigation
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map || !isMapMountedRef.current) return;
 
     const prevSelectedId = prevSelectedIdRef.current;
     const selectionSource = selectionSourceRef.current;
     const isNewSelection = prevSelectedId !== selectedId;
 
-    // Reset navigation tracking when selection actually changes
     if (isNewSelection) {
       hasNavigatedToSelectionRef.current = false;
     }
 
-    // Capture current markers ref for use in this effect
     const currentMarkers = markersRef.current;
 
-    // Update icons for all markers
     currentMarkers.forEach((marker, id) => {
-      marker.setIcon(id === selectedId ? selectedIcon : defaultIcon);
+      try {
+        marker.setIcon(id === selectedId ? selectedIcon : defaultIcon);
+      } catch {}
     });
 
-    // Close previous popup if switching markers
     if (prevSelectedId && isNewSelection) {
       const prevMarker = currentMarkers.get(prevSelectedId);
       if (prevMarker?.isPopupOpen()) {
@@ -471,21 +675,16 @@ export default function MapView({
       }
     }
 
-    // Handle the newly selected marker
     if (selectedId && isNewSelection) {
       const selectedMarker = currentMarkers.get(selectedId);
 
       if (selectedMarker) {
-        // If selection came from clicking the marker directly,
-        // Leaflet already handles the popup - we just need icons updated (done above)
         if (selectionSource === "marker") {
-          // Marker click already opened popup via Leaflet's default behavior
-          // Mark as navigated and reset the source flag
+          // Marker was clicked directly - Leaflet handles popup, just track state
           hasNavigatedToSelectionRef.current = true;
           selectionSourceRef.current = null;
         } else {
-          // Selection came from external source (ResultList, URL, etc.)
-          // Only navigate if we haven't already and user isn't currently interacting
+          // External selection (ResultList, URL) - navigate to marker if needed
           if (
             !hasNavigatedToSelectionRef.current &&
             !userInteractingRef.current
@@ -493,20 +692,14 @@ export default function MapView({
             const latLng = selectedMarker.getLatLng();
             const currentZoom = map.getZoom();
             const currentBounds = map.getBounds();
-
-            // Check if marker is already visible
             const isMarkerVisible = currentBounds.contains(latLng);
             const isZoomedInEnough = currentZoom >= SELECTED_ZOOM;
 
             if (isMarkerVisible && isZoomedInEnough) {
-              // Marker is visible - just open popup, no navigation needed
               selectedMarker.openPopup();
               hasNavigatedToSelectionRef.current = true;
             } else {
-              // Need to fly to marker
               const targetZoom = Math.max(currentZoom, SELECTED_ZOOM);
-
-              // Calculate offset for popup visibility
               const containerSize = map.getSize();
               const offsetY = containerSize.y * 0.2;
               const targetPoint = map.project(latLng, targetZoom);
@@ -516,16 +709,13 @@ export default function MapView({
               );
               const offsetLatLng = map.unproject(offsetPoint, targetZoom);
 
-              // Mark as navigated before flying to prevent re-triggering
               hasNavigatedToSelectionRef.current = true;
 
-              // Use flyTo for smooth animation
               map.flyTo(offsetLatLng, targetZoom, {
                 animate: true,
                 duration: 0.5,
               });
 
-              // Open popup after animation ends
               const onMoveEnd = () => {
                 selectedMarker.openPopup();
                 map.off("moveend", onMoveEnd);
@@ -537,7 +727,6 @@ export default function MapView({
       }
     }
 
-    // Update previous selection ref
     prevSelectedIdRef.current = selectedId;
   }, [selectedId]);
 

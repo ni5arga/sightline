@@ -347,12 +347,6 @@ body {
   pointer-events: none;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .search-examples {
   position: absolute;
   top: calc(100% + 4px);
@@ -525,7 +519,7 @@ body {
 
 .app-main {
   display: grid;
-  grid-template-columns: 240px 1fr 45%; /* Filters, Results (55%), Map (45%) */
+  grid-template-columns: 240px 1fr 45%;
   flex: 1;
   overflow: hidden;
 }
@@ -547,13 +541,13 @@ body {
   overflow-x: hidden;
   padding: 16px 0;
   height: 100%;
-  min-height: 0; /* Required for scroll in grid/flex context */
-  scrollbar-width: none !important; /* Firefox */
-  -ms-overflow-style: none !important; /* IE/Edge */
+  min-height: 0;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 .filters-panel::-webkit-scrollbar {
-  display: none !important; /* Chrome/Safari/Opera */
+  display: none !important;
   width: 0 !important;
   height: 0 !important;
 }
@@ -779,28 +773,24 @@ body {
   font-family: ui-monospace, SFMono-Regular, monospace;
 }
 
-/* ScrollArea wrapper - takes full flex space */
 .results-list-scroll {
   flex: 1;
   min-height: 0;
 }
 
-/* Hide native scrollbar in ScrollArea viewport */
 .results-list-scroll [data-radix-scroll-area-viewport] {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .results-list-scroll [data-radix-scroll-area-viewport]::-webkit-scrollbar {
-  display: none; /* Chrome/Safari/Opera */
+  display: none;
 }
 
-/* Content inside ScrollArea viewport */
 .results-list-content {
   padding: 8px;
 }
 
-/* Legacy class preserved for backwards compatibility */
 .results-list {
   flex: 1;
   overflow-y: auto;
@@ -984,10 +974,6 @@ body {
   color: var(--text-secondary) !important;
 }
 
-/* =============================================================================
-   LAYER CONTROL STYLING
-   ============================================================================= */
-
 .leaflet-control-layers {
   background: var(--bg-secondary) !important;
   border: 1px solid var(--border-primary) !important;
@@ -1076,7 +1062,6 @@ body {
   gap: 6px !important;
 }
 
-/* Custom radio button styling */
 .leaflet-control-layers-selector {
   appearance: none !important;
   -webkit-appearance: none !important;
@@ -1121,7 +1106,6 @@ body {
   margin: 6px 8px !important;
 }
 
-/* Mobile touch-friendly adjustments */
 @media (max-width: 768px) {
   .leaflet-control-layers {
     border-radius: 10px !important;
@@ -1153,7 +1137,6 @@ body {
   }
 }
 
-/* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   .leaflet-control-layers-toggle,
   .leaflet-control-layers-base label,
@@ -1176,6 +1159,122 @@ body {
 .marker-selected .marker-pin.selected {
   background: var(--success);
   box-shadow: 0 0 0 4px rgba(63, 185, 80, 0.3);
+}
+
+.marker-cluster {
+  background: transparent !important;
+}
+
+.marker-cluster .cluster-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-primary);
+  border: 2px solid var(--bg-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+  will-change: transform;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.marker-cluster:hover .cluster-icon {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.marker-cluster:focus .cluster-icon,
+.marker-cluster:focus-visible .cluster-icon {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.marker-cluster-small .cluster-icon {
+  background: var(--accent);
+  font-size: 11px;
+}
+
+.marker-cluster-medium .cluster-icon {
+  background: var(--warning);
+  font-size: 12px;
+}
+
+.marker-cluster-large .cluster-icon {
+  background: var(--error);
+  font-size: 13px;
+}
+
+.marker-cluster-xlarge .cluster-icon {
+  background: linear-gradient(135deg, var(--error) 0%, #b91c1c 100%);
+  font-size: 14px;
+  font-weight: 700;
+  border-width: 3px;
+}
+
+.leaflet-cluster-anim .leaflet-marker-icon,
+.leaflet-cluster-anim .leaflet-marker-shadow {
+  transition:
+    transform 0.25s ease-out,
+    opacity 0.25s ease-out !important;
+}
+
+.leaflet-cluster-spider-leg {
+  stroke: var(--border-primary);
+  stroke-opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker-cluster .cluster-icon {
+    transition: none;
+    will-change: auto;
+  }
+
+  .marker-cluster:hover .cluster-icon {
+    transform: none;
+  }
+
+  .leaflet-cluster-anim .leaflet-marker-icon,
+  .leaflet-cluster-anim .leaflet-marker-shadow {
+    transition: none !important;
+  }
+
+  .leaflet-fade-anim .leaflet-tile,
+  .leaflet-fade-anim .leaflet-popup {
+    transition: none !important;
+  }
+
+  .leaflet-zoom-anim .leaflet-zoom-animated {
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .marker-cluster .cluster-icon {
+    border-width: 3px;
+    border-color: var(--text-primary);
+  }
+
+  .marker-cluster-small .cluster-icon {
+    background: #0066cc;
+  }
+
+  .marker-cluster-medium .cluster-icon {
+    background: #cc6600;
+  }
+
+  .marker-cluster-large .cluster-icon,
+  .marker-cluster-xlarge .cluster-icon {
+    background: #cc0000;
+  }
 }
 
 .dark-popup .leaflet-popup-content-wrapper {
@@ -1284,16 +1383,6 @@ body {
   background: var(--bg-hover);
 }
 
-/* ============================================
-   RESPONSIVE BREAKPOINTS
-   - xl: > 1280px (Large desktops)
-   - lg: 1024px - 1280px (Small desktops/laptops)
-   - md: 768px - 1024px (Tablets)
-   - sm: 480px - 768px (Large phones/small tablets)
-   - xs: < 480px (Mobile phones)
-   ============================================ */
-
-/* Large Desktop (xl) - 3 column layout: Filters + Results (55%) | Map (45%) */
 @media (min-width: 1280px) {
   .app-main {
     grid-template-columns: 280px 1fr 45%;
@@ -1304,10 +1393,9 @@ body {
   }
 }
 
-/* Small Desktop/Laptop (lg) - 3 column layout with smaller filters */
 @media (max-width: 1279px) and (min-width: 1025px) {
   .app-main {
-    grid-template-columns: 200px 1fr 45%; /* Filters (smaller), Results (55%), Map (45%) */
+    grid-template-columns: 200px 1fr 45%;
   }
 
   .header-link-text {
@@ -1319,7 +1407,6 @@ body {
   }
 }
 
-/* Mobile + Tablet (sm + md) - Single column with bottom navigation */
 @media (max-width: 1024px) {
   .app-header {
     padding: 0 12px;
@@ -1360,7 +1447,7 @@ body {
   }
 
   .search-input {
-    font-size: 16px; /* Prevents iOS zoom on focus */
+    font-size: 16px;
     height: 40px;
   }
 
@@ -1404,7 +1491,6 @@ body {
     position: relative;
   }
 
-  /* Allow map popups to overflow */
   .panel-map.mobile-active {
     overflow: visible;
   }
@@ -1415,7 +1501,7 @@ body {
     border: none;
     width: 100%;
     overflow-y: auto;
-    min-height: 0; /* Important for flex scroll */
+    min-height: 0;
   }
 
   .panel-map.mobile-active .map-container {
@@ -1529,7 +1615,6 @@ body {
     overflow-y: auto;
   }
 
-  /* Query debug section on mobile */
   .query-debug {
     font-size: 14px;
   }
@@ -1543,7 +1628,6 @@ body {
     margin-top: 4px;
   }
 
-  /* Map popup adjustments for mobile */
   .dark-popup .leaflet-popup-content-wrapper {
     max-width: calc(100vw - 60px) !important;
     width: calc(100vw - 60px) !important;
@@ -1622,7 +1706,6 @@ body {
     word-break: break-all;
   }
 
-  /* Leaflet popup positioning for mobile */
   .leaflet-popup {
     margin-bottom: 20px;
     z-index: 10000 !important;
@@ -1632,7 +1715,6 @@ body {
     z-index: 10000 !important;
   }
 
-  /* Leaflet controls on mobile */
   .leaflet-control-zoom {
     margin-right: 8px !important;
     margin-top: 8px !important;
@@ -1646,7 +1728,6 @@ body {
   }
 }
 
-/* Extra small mobile (xs) */
 @media (max-width: 480px) {
   .app-header {
     height: 48px;
@@ -1731,7 +1812,6 @@ body {
   }
 }
 
-/* Landscape mobile orientation */
 @media (max-width: 768px) and (orientation: landscape) {
   .app-header {
     height: 44px;
@@ -1764,7 +1844,6 @@ body {
   }
 }
 
-/* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
   .filter-item {
     min-height: 44px;
@@ -1784,7 +1863,6 @@ body {
     min-height: 48px;
   }
 
-  /* Larger touch targets for map controls */
   .leaflet-control-zoom a {
     width: 40px !important;
     height: 40px !important;
