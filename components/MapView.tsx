@@ -288,10 +288,38 @@ export default function MapView({
       }, 100);
     };
 
+    // Close popup intelligently when marker leaves viewport after user interaction
+    // This allows small pan adjustments while viewing popup, but closes it when
+    // the user navigates far enough that the marker is no longer visible
+    const handleMoveEnd = () => {
+      handleInteractionEnd();
+
+      // Check if there's an open popup and if its marker is still visible
+      const openPopup = map
+        .getPane("popupPane")
+        ?.querySelector(".leaflet-popup");
+      if (openPopup) {
+        // Find the marker that has this popup open
+        const currentMarkers = markersRef.current;
+        for (const [, marker] of currentMarkers) {
+          if (marker.isPopupOpen()) {
+            const markerLatLng = marker.getLatLng();
+            const bounds = map.getBounds();
+
+            // Close popup if marker is outside the visible bounds
+            if (!bounds.contains(markerLatLng)) {
+              marker.closePopup();
+            }
+            break;
+          }
+        }
+      }
+    };
+
     map.on("dragstart", handleInteractionStart);
     map.on("zoomstart", handleInteractionStart);
-    map.on("dragend", handleInteractionEnd);
-    map.on("zoomend", handleInteractionEnd);
+    map.on("dragend", handleMoveEnd);
+    map.on("zoomend", handleMoveEnd);
 
     mapRef.current = map;
 
@@ -300,8 +328,8 @@ export default function MapView({
       map.off("baselayerchange", handleBaseLayerChange);
       map.off("dragstart", handleInteractionStart);
       map.off("zoomstart", handleInteractionStart);
-      map.off("dragend", handleInteractionEnd);
-      map.off("zoomend", handleInteractionEnd);
+      map.off("dragend", handleMoveEnd);
+      map.off("zoomend", handleMoveEnd);
       tileLayersRef.current.forEach((layer) => {
         layer.off(); // Remove all layer event listeners
         layer.remove();
@@ -378,7 +406,9 @@ export default function MapView({
         className: "dark-popup",
         autoPan: true,
         autoPanPadding: [30, 80],
-        keepInView: true,
+        // keepInView is disabled to allow free map navigation while a marker is selected
+        // Users can pan anywhere without the map auto-snapping back to the popup
+        keepInView: false,
       });
 
       // Handle marker click - mark selection source as "marker"
