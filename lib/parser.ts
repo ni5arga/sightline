@@ -20,6 +20,18 @@ const TYPE_PATTERNS = [
   { pattern: /\bwind\s*(?:farm|turbine)s?\b/i, type: 'wind' },
   { pattern: /\bnuclear\s*(?:plant|reactor)s?\b/i, type: 'nuclear' },
   { pattern: /\bdams?\b/i, type: 'dam' },
+  // Energy & Power - Additional types
+  { pattern: /\bgeothermal\s*(?:plant|power|energy)?\b/i, type: 'geothermal' },
+  { pattern: /\bbiogas\s*(?:plant|facility)?\b/i, type: 'biogas' },
+  { pattern: /\bbiomass\s*(?:plant|power|facility)?\b/i, type: 'biomass' },
+  { pattern: /\btidal\s*(?:power|plant|energy)?\b/i, type: 'tidal' },
+  { pattern: /\bgas\s*(?:power\s*)?(?:plant|station)s?\b/i, type: 'gas_power' },
+  { pattern: /\boil\s*(?:power\s*)?(?:plant|station)s?\b/i, type: 'oil_power' },
+  { pattern: /\bcoal\s*(?:power\s*)?(?:plant|station)s?\b/i, type: 'coal' },
+  { pattern: /\bhydro(?:electric)?\s*(?:plant|power|dam)?\b/i, type: 'hydroelectric' },
+  { pattern: /\bpower\s*lines?\b/i, type: 'power_line' },
+  { pattern: /\b(?:electricity|electric|power)\s*poles?\b/i, type: 'power_pole' },
+  { pattern: /\btransformers?\b/i, type: 'transformer' },
   { pattern: /\bmilitary\s*(?:base|installation|facility)?\b/i, type: 'military' },
   { pattern: /\bprisons?\b/i, type: 'prison' },
   { pattern: /\bhospitals?\b/i, type: 'hospital' },
@@ -88,7 +100,34 @@ const TYPE_PATTERNS = [
   { pattern: /\bnaval\s*bases?\b/i, type: 'naval_base' },
   { pattern: /\b(?:firing|shooting)\s*ranges?\b/i, type: 'range' },
   { pattern: /\bcheckpoints?\b/i, type: 'checkpoint' },
-  { pattern: /\bborder\s*(?:control|crossing)s?\b/i, type: 'border_control' }
+  { pattern: /\bborder\s*(?:control|crossing)s?\b/i, type: 'border_control' },
+  // Emergency Services
+  { pattern: /\bambulance\s*(?:station|depot|base)s?\b/i, type: 'ambulance_station' },
+  { pattern: /\brescue\s*(?:station|team|base)s?\b/i, type: 'rescue_station' },
+  { pattern: /\blifeguard\s*(?:station|tower|post)s?\b/i, type: 'lifeguard' },
+  { pattern: /\bfire\s*hydrants?\b/i, type: 'fire_hydrant' },
+  { pattern: /\b(?:emergency|sos)\s*(?:phone|call\s*box)s?\b/i, type: 'emergency_phone' },
+  { pattern: /\bcoast\s*guards?\s*(?:station|base)?\b/i, type: 'coast_guard' },
+  // Transportation - Aviation
+  { pattern: /\btaxiways?\b/i, type: 'taxiway' },
+  { pattern: /\brunways?\b/i, type: 'runway' },
+  { pattern: /\b(?:airport|airline)?\s*terminals?\b/i, type: 'terminal' },
+  { pattern: /\bhangars?\b/i, type: 'hangar' },
+  { pattern: /\b(?:atc|air\s*traffic\s*control)\s*(?:tower)?s?\b/i, type: 'atc_tower' },
+  // Transportation - Maritime
+  { pattern: /\bdocks?\b/i, type: 'dock' },
+  { pattern: /\bmarinas?\b/i, type: 'marina' },
+  { pattern: /\bshipyards?\b/i, type: 'shipyard' },
+  { pattern: /\bseaports?\b/i, type: 'seaport' },
+  // Transportation - Rail & Road
+  { pattern: /\btram\s*(?:stop|station)s?\b/i, type: 'tram_stop' },
+  { pattern: /\b(?:railway|train)\s*halts?\b/i, type: 'halt' },
+  { pattern: /\blevel\s*crossings?\b/i, type: 'level_crossing' },
+  { pattern: /\b(?:railroad|railway)\s*crossings?\b/i, type: 'level_crossing' },
+  { pattern: /\btoll\s*(?:booth|plaza|station)s?\b/i, type: 'toll_booth' },
+  { pattern: /\bweigh\s*(?:station|bridge)s?\b/i, type: 'weigh_station' },
+  { pattern: /\brest\s*(?:area|stop)s?\b/i, type: 'rest_area' },
+  { pattern: /\bservice\s*(?:area|station|plaza)s?\b/i, type: 'service_area' }
 ];
 
 const NEAR_PATTERN = /\bnear\s+(.+?)(?:\s+(?:in|within|radius)|$)/i;

@@ -756,6 +756,20 @@ export const ASSET_TYPE_MAP: Record<string, { osmTags: Record<string, string | s
   sewage_plant: {
     osmTags: { 'man_made': 'wastewater_plant' },
     label: 'Sewage Plant'
+  },
+  // Transportation - Highway facilities
+  rest_area: {
+    osmTags: { 'highway': 'rest_area' },
+    label: 'Rest Area'
+  },
+  service_area: {
+    osmTags: { 'highway': 'services' },
+    label: 'Service Area'
+  },
+  // Aviation - Control
+  atc_tower: {
+    osmTags: { 'aeroway': 'control_tower' },
+    label: 'ATC Tower'
   }
 };
 
