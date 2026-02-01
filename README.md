@@ -169,6 +169,7 @@ type:airport country:france
 | `taxiway` | - | Airport taxiways |
 | `terminal` | - | Airport terminals |
 | `hangar` | - | Aircraft hangars |
+| `atc_tower` | - | Air traffic control towers |
 
 #### Maritime
 | Type | Aliases | Description |
@@ -194,6 +195,8 @@ type:airport country:france
 | `parking` | - | Parking facilities |
 | `toll_booth` | - | Toll booths |
 | `weigh_station` | - | Truck weigh stations |
+| `rest_area` | - | Highway rest areas |
+| `service_area` | - | Highway service areas |
 
 #### Structures
 | Type | Aliases | Description |
@@ -249,6 +252,9 @@ type:airport country:france
 | `ambulance_station` | - | Ambulance stations |
 | `rescue_station` | - | Rescue stations |
 | `coast_guard` | - | Coast guard stations |
+| `emergency_phone` | - | Emergency phones |
+| `fire_hydrant` | - | Fire hydrants |
+| `lifeguard` | - | Lifeguard stations |
 
 #### Education & Research
 | Type | Aliases | Description |
