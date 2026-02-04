@@ -62,6 +62,8 @@ const TYPE_PATTERNS = [
   { pattern: /\bcooling\s*towers?\b/i, type: 'cooling_tower' },
   { pattern: /\blighthouses?\b/i, type: 'lighthouse' },
   { pattern: /\bradars?\b/i, type: 'radar' },
+  { pattern: /\b(?:surveillance|security|cctv)\s*cameras?\b/i, type: 'surveillance_camera' },
+  { pattern: /\bcctv\b/i, type: 'surveillance_camera' },
   { pattern: /\bantennas?\b/i, type: 'antenna' },
   { pattern: /\bmasts?\b/i, type: 'mast' },
   { pattern: /\bbridges?\b/i, type: 'bridge' },

@@ -18,6 +18,7 @@ Sightline enables searching, monitoring, and analyzing real-world infrastructure
 - Pipelines and refineries
 - Military installations
 - Hospitals, prisons, embassies
+- Surveillance cameras and security infrastructure
 
 And many more asset types across 20+ categories with over 150 searchable infrastructure types.
 
@@ -255,6 +256,7 @@ type:airport country:france
 | `emergency_phone` | - | Emergency phones |
 | `fire_hydrant` | - | Fire hydrants |
 | `lifeguard` | - | Lifeguard stations |
+| `surveillance_camera` | `cctv` | Surveillance cameras |
 
 #### Education & Research
 | Type | Aliases | Description |

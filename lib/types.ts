@@ -262,8 +262,16 @@ export const ASSET_TYPE_MAP: Record<string, { osmTags: Record<string, string | s
     label: 'Lighthouse'
   },
   radar: {
-    osmTags: { 'man_made': 'surveillance' },
+    osmTags: { 'man_made': 'radar' },
     label: 'Radar'
+  },
+  surveillance_camera: {
+    osmTags: { 'man_made': 'surveillance', 'surveillance:type': 'camera' },
+    label: 'Surveillance Camera'
+  },
+  cctv: {
+    osmTags: { 'man_made': 'surveillance', 'surveillance:type': 'camera' },
+    label: 'Surveillance Camera'
   },
   antenna: {
     osmTags: { 'man_made': 'antenna' },
