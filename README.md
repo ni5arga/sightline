@@ -375,14 +375,18 @@ components/
 ├── SearchBar.tsx         # Query input
 ├── Filters.tsx           # Filter sidebar
 ├── ResultList.tsx        # Results display
-└── MapView.tsx           # Leaflet map
+├── MapView.tsx           # Leaflet map
+├── ShareButton.tsx       # Share functionality
+└── ui/
+    └── scroll-area.tsx   # UI components
 
 lib/
 ├── types.ts              # Type definitions
 ├── parser.ts             # Query parsing and NLP
 ├── geo.ts                # Nominatim integration
 ├── overpass.ts           # Overpass API queries
-└── cache.ts              # In-memory caching
+├── cache.ts              # In-memory caching
+├── search-index.ts       # Search indexing
 ```
 
 ## Deployment
