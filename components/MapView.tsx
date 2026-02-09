@@ -492,7 +492,7 @@ export default function MapView({
         ${safeOperator ? `<div class="popup-operator">${safeOperator}</div>` : ""}
         <div class="popup-coords">${asset.lat.toFixed(5)}, ${asset.lon.toFixed(5)}</div>
         ${tags ? `<table class="popup-tags">${tags}</table>` : ""}
-        <a class="popup-osm-link" href="https://www.openstreetmap.org/${encodeURIComponent(asset.id)}" target="_blank" rel="noopener noreferrer">View on OSM</a>
+        <a class="popup-osm-link" href="https://www.openstreetmap.org/${asset.id}" target="_blank" rel="noopener noreferrer">View on OSM</a>
       </div>
     `;
   }, []);

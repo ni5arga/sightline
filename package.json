@@ -17,7 +17,7 @@
     "clsx": "^2.1.1",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
-    "next": "16.1.4",
+    "next": "^16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-leaflet": "^5.0.0",
