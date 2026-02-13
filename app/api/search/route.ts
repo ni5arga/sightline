@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { parseQuery, validateQuery } from '@/lib/parser';
-import { resolveLocation, calculateBoundingBox } from '@/lib/geo';
+import { resolveLocation, calculateBoundingBox, osmIdToAreaId } from '@/lib/geo';
 import { buildOverpassQuery, buildMultiTypeQuery, executeQuery, calculateStats } from '@/lib/overpass';
 import { getCachedSearchResult, cacheSearchResult, getCachedGeoResult, cacheGeoResult } from '@/lib/cache';
 import type { SearchResult, SearchError, GeoResult } from '@/lib/types';
@@ -82,12 +82,20 @@ export async function POST(request: NextRequest): Promise<NextResponse<SearchRes
       bbox = geoResult.boundingBox;
     }
 
+    // Convert OSM ID to Overpass area ID for precise geographic filtering
+    // Only use area filter if we have OSM type and ID (from region/country searches)
+    // Don't use for 'near' searches as they use radius-based bounding boxes
+    let areaId: number | null = null;
+    if (!parsed.near && geoResult.osmType && geoResult.osmId) {
+      areaId = osmIdToAreaId(geoResult.osmType, geoResult.osmId);
+    }
+
     let overpassQuery: string;
     
     if (parsed.type) {
-      overpassQuery = buildOverpassQuery(parsed.type, bbox, parsed.operator);
+      overpassQuery = buildOverpassQuery(parsed.type, bbox, parsed.operator, areaId);
     } else if (parsed.operator) {
-      overpassQuery = buildMultiTypeQuery(bbox, parsed.operator);
+      overpassQuery = buildMultiTypeQuery(bbox, parsed.operator, areaId);
     } else {
       return NextResponse.json(
         { error: 'Either asset type or operator must be specified', code: 'INSUFFICIENT_FILTERS' },

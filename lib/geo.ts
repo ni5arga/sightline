@@ -82,6 +82,8 @@ export async function geocode(query: string, countryCode?: string): Promise<GeoR
     ] as [number, number, number, number],
     type: item.type,
     importance: item.importance,
+    osmType: item.osm_type,
+    osmId: item.osm_id,
     addressComponents: {
       country: item.address?.country,
       state: item.address?.state,
@@ -152,4 +154,20 @@ export function bboxToString(bbox: [number, number, number, number]): string {
 
 export function isBoundingBoxTooLarge(): boolean {
   return false;
+}
+
+/**
+ * Convert OSM ID to Overpass area ID
+ * For relations: area_id = osm_id + 3600000000
+ * For ways: area_id = osm_id + 2400000000
+ * For administrative boundaries, we primarily use relations
+ */
+export function osmIdToAreaId(osmType: string, osmId: number): number | null {
+  if (osmType === 'relation') {
+    return osmId + 3600000000;
+  } else if (osmType === 'way') {
+    return osmId + 2400000000;
+  }
+  // Nodes cannot be converted to areas
+  return null;
 }

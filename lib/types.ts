@@ -15,6 +15,8 @@ export interface GeoResult {
   boundingBox: [number, number, number, number];
   type: string;
   importance: number;
+  osmType?: string;
+  osmId?: number;
   addressComponents: {
     country?: string;
     state?: string;

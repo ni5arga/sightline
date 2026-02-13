@@ -35,7 +35,8 @@ function buildTagFilter(osmTags: Record<string, string | string[]>): string {
 export function buildOverpassQuery(
   assetType: string,
   bbox: [number, number, number, number],
-  operator?: string | null
+  operator?: string | null,
+  areaId?: number | null
 ): string {
   const typeConfig = ASSET_TYPE_MAP[assetType];
   if (!typeConfig) {
@@ -50,12 +51,20 @@ export function buildOverpassQuery(
     operatorFilter = `["operator"~"${operator}",i]`;
   }
 
+  // Use area filter if available for precise geographic boundaries
+  let locationFilter = '';
+  if (areaId) {
+    locationFilter = `(area:${areaId})`;
+  } else {
+    locationFilter = `(${bboxStr})`;
+  }
+
   const query = `
 [out:json][timeout:25][maxsize:50000000];
 (
-  node${tagFilter}${operatorFilter}(${bboxStr});
-  way${tagFilter}${operatorFilter}(${bboxStr});
-  relation${tagFilter}${operatorFilter}(${bboxStr});
+  node${tagFilter}${operatorFilter}${locationFilter};
+  way${tagFilter}${operatorFilter}${locationFilter};
+  relation${tagFilter}${operatorFilter}${locationFilter};
 );
 out center ${MAX_RESULTS};
 `.trim();
@@ -65,16 +74,25 @@ out center ${MAX_RESULTS};
 
 export function buildMultiTypeQuery(
   bbox: [number, number, number, number],
-  operator: string
+  operator: string,
+  areaId?: number | null
 ): string {
   const bboxStr = `${bbox[0]},${bbox[2]},${bbox[1]},${bbox[3]}`;
+  
+  // Use area filter if available for precise geographic boundaries
+  let locationFilter = '';
+  if (areaId) {
+    locationFilter = `(area:${areaId})`;
+  } else {
+    locationFilter = `(${bboxStr})`;
+  }
   
   const query = `
 [out:json][timeout:25][maxsize:50000000];
 (
-  node["operator"~"${operator}",i](${bboxStr});
-  way["operator"~"${operator}",i](${bboxStr});
-  relation["operator"~"${operator}",i](${bboxStr});
+  node["operator"~"${operator}",i]${locationFilter};
+  way["operator"~"${operator}",i]${locationFilter};
+  relation["operator"~"${operator}",i]${locationFilter};
 );
 out center ${MAX_RESULTS};
 `.trim();
