@@ -276,7 +276,7 @@ export const EXAMPLE_QUERIES: string[] = [
   "power plants in texas",
   "train stations in tokyo",
   "ambulance stations in berlin",
-  "rest areas near highway",
+  "towers in delhi",
 ];
 
 const EXAMPLE_QUERIES_LOWER: string[] = EXAMPLE_QUERIES.map((q) =>

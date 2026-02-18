@@ -537,7 +537,8 @@ export const ASSET_TYPE_MAP: Record<string, { osmTags: Record<string, string | s
   cell_tower: {
     osmTags: [
       { 'communication:mobile_phone': 'yes' },
-      { 'tower:type': 'communications_tower' }
+      { 'tower:type': 'communications_tower' },
+      { 'man_made': 'communications_tower' }
     ],
     label: 'Cell Tower'
   },
