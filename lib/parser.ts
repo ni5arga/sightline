@@ -3,6 +3,10 @@ import { ParsedQuery, ASSET_TYPE_MAP, OPERATOR_ALIASES } from './types';
 const STRUCTURED_PATTERN = /^(?:type:|operator:|region:|country:|near:|radius:)/i;
 
 const TYPE_PATTERNS = [
+  { pattern: /\bcell(?:phone|ular)?\s*(?:tower|mast)s?\b/i, type: 'cell_tower' },
+  { pattern: /\bmobile\s*(?:phone)?\s*(?:tower|mast)s?\b/i, type: 'cell_tower' },
+  { pattern: /\bradio\s*(?:tower|mast)s?\b/i, type: 'radio_tower' },
+  { pattern: /\bbroadcast(?:ing)?\s*(?:tower|mast)s?\b/i, type: 'broadcast_tower' },
   { pattern: /\b(?:telecom|communication)\s*(?:tower|mast)s?\b/i, type: 'telecom' },
   { pattern: /\btowers?\b/i, type: 'telecom' },
   { pattern: /\bdata\s*cent(?:er|re)s?\b/i, type: 'data_center' },

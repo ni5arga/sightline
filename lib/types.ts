@@ -52,11 +52,19 @@ export interface SearchError {
 
 export const ASSET_TYPE_MAP: Record<string, { osmTags: Record<string, string | string[]> | Record<string, string | string[]>[]; label: string }> = {
   telecom: {
-    osmTags: { 'man_made': 'tower', 'tower:type': ['communication', 'telecommunications'] },
+    osmTags: [
+      { 'man_made': 'tower', 'tower:type': ['communication', 'telecommunications'] },
+      { 'man_made': 'communications_tower' },
+      { 'communication:mobile_phone': 'yes' }
+    ],
     label: 'Telecom Tower'
   },
   tower: {
-    osmTags: { 'man_made': 'tower', 'tower:type': ['communication', 'telecommunications'] },
+    osmTags: [
+      { 'man_made': 'tower', 'tower:type': ['communication', 'telecommunications'] },
+      { 'man_made': 'communications_tower' },
+      { 'communication:mobile_phone': 'yes' }
+    ],
     label: 'Telecom Tower'
   },
   data_center: {
