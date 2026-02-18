@@ -50,7 +50,7 @@ export interface SearchError {
   code: string;
 }
 
-export const ASSET_TYPE_MAP: Record<string, { osmTags: Record<string, string | string[]>; label: string }> = {
+export const ASSET_TYPE_MAP: Record<string, { osmTags: Record<string, string | string[]> | Record<string, string | string[]>[]; label: string }> = {
   telecom: {
     osmTags: { 'man_made': 'tower', 'tower:type': ['communication', 'telecommunications'] },
     label: 'Telecom Tower'
@@ -535,7 +535,10 @@ export const ASSET_TYPE_MAP: Record<string, { osmTags: Record<string, string | s
   },
   // Communication
   cell_tower: {
-    osmTags: { 'communication:mobile_phone': 'yes' },
+    osmTags: [
+      { 'communication:mobile_phone': 'yes' },
+      { 'tower:type': 'communications_tower' }
+    ],
     label: 'Cell Tower'
   },
   radio_tower: {

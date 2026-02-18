@@ -44,7 +44,6 @@ export function buildOverpassQuery(
   }
 
   const bboxStr = `${bbox[0]},${bbox[2]},${bbox[1]},${bbox[3]}`;
-  const tagFilter = buildTagFilter(typeConfig.osmTags);
   
   let operatorFilter = '';
   if (operator) {
@@ -59,12 +58,21 @@ export function buildOverpassQuery(
     locationFilter = `(${bboxStr})`;
   }
 
+  // Handle osmTags as either a single object or array of objects (OR conditions)
+  const osmTagsArray = Array.isArray(typeConfig.osmTags) ? typeConfig.osmTags : [typeConfig.osmTags];
+  
+  let unionParts: string[] = [];
+  for (const osmTags of osmTagsArray) {
+    const tagFilter = buildTagFilter(osmTags);
+    unionParts.push(`  node${tagFilter}${operatorFilter}${locationFilter};`);
+    unionParts.push(`  way${tagFilter}${operatorFilter}${locationFilter};`);
+    unionParts.push(`  relation${tagFilter}${operatorFilter}${locationFilter};`);
+  }
+
   const query = `
 [out:json][timeout:25][maxsize:50000000];
 (
-  node${tagFilter}${operatorFilter}${locationFilter};
-  way${tagFilter}${operatorFilter}${locationFilter};
-  relation${tagFilter}${operatorFilter}${locationFilter};
+${unionParts.join('\n')}
 );
 out center ${MAX_RESULTS};
 `.trim();
