@@ -739,37 +739,51 @@ export default function MapView({
             !userInteractingRef.current
           ) {
             const latLng = selectedMarker.getLatLng();
-            const currentZoom = map.getZoom();
-            const currentBounds = map.getBounds();
-            const isMarkerVisible = currentBounds.contains(latLng);
-            const isZoomedInEnough = currentZoom >= SELECTED_ZOOM;
+            const markerCluster = markerClusterRef.current;
 
-            if (isMarkerVisible && isZoomedInEnough) {
-              selectedMarker.openPopup();
-              hasNavigatedToSelectionRef.current = true;
-            } else {
-              const targetZoom = Math.max(currentZoom, SELECTED_ZOOM);
-              const containerSize = map.getSize();
-              const offsetY = containerSize.y * 0.2;
-              const targetPoint = map.project(latLng, targetZoom);
-              const offsetPoint = L.point(
-                targetPoint.x,
-                targetPoint.y - offsetY,
-              );
-              const offsetLatLng = map.unproject(offsetPoint, targetZoom);
+            hasNavigatedToSelectionRef.current = true;
 
-              hasNavigatedToSelectionRef.current = true;
-
-              map.flyTo(offsetLatLng, targetZoom, {
-                animate: true,
-                duration: 0.5,
+            // If marker is in a cluster, use zoomToShowLayer to expand it
+            if (markerCluster && map.hasLayer(markerCluster) && showClusters) {
+              markerCluster.zoomToShowLayer(selectedMarker, () => {
+                // Open popup after cluster has been expanded
+                setTimeout(() => {
+                  if (isMapMountedRef.current && selectedMarker) {
+                    selectedMarker.openPopup();
+                  }
+                }, 100);
               });
+            } else {
+              // No clustering or marker is already visible
+              const currentZoom = map.getZoom();
+              const currentBounds = map.getBounds();
+              const isMarkerVisible = currentBounds.contains(latLng);
+              const isZoomedInEnough = currentZoom >= SELECTED_ZOOM;
 
-              const onMoveEnd = () => {
+              if (isMarkerVisible && isZoomedInEnough) {
                 selectedMarker.openPopup();
-                map.off("moveend", onMoveEnd);
-              };
-              map.on("moveend", onMoveEnd);
+              } else {
+                const targetZoom = Math.max(currentZoom, SELECTED_ZOOM);
+                const containerSize = map.getSize();
+                const offsetY = containerSize.y * 0.2;
+                const targetPoint = map.project(latLng, targetZoom);
+                const offsetPoint = L.point(
+                  targetPoint.x,
+                  targetPoint.y - offsetY,
+                );
+                const offsetLatLng = map.unproject(offsetPoint, targetZoom);
+
+                map.flyTo(offsetLatLng, targetZoom, {
+                  animate: true,
+                  duration: 0.5,
+                });
+
+                const onMoveEnd = () => {
+                  selectedMarker.openPopup();
+                  map.off("moveend", onMoveEnd);
+                };
+                map.on("moveend", onMoveEnd);
+              }
             }
           }
         }
@@ -777,7 +791,7 @@ export default function MapView({
     }
 
     prevSelectedIdRef.current = selectedId;
-  }, [selectedId]);
+  }, [selectedId, showClusters]);
 
   return (
     <div className="map-container">
