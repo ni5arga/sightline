@@ -83,11 +83,13 @@ function HomeContent() {
 
   // UI state
   const [mobileTab, setMobileTab] = useState<MobileTab>("map");
+  const [resultsPanelWidth, setResultsPanelWidth] = useState<number | null>(null);
   const breakpoint = useBreakpoint();
 
   // Refs for URL sync
   const isInitialMount = useRef(true);
   const lastUrlQuery = useRef<string | null>(null);
+  const isResizing = useRef(false);
 
   // Update default tab based on breakpoint
   useEffect(() => {
@@ -180,6 +182,41 @@ function HomeContent() {
     [handleSearch],
   );
 
+  // Resize handlers for results panel
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizing.current = true;
+    document.body.style.cursor = "ew-resize";
+    document.body.style.userSelect = "none";
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing.current) return;
+      
+      // Calculate width from left edge (240px filters panel + desired results width)
+      const filtersWidth = 240;
+      const newWidth = Math.max(250, Math.min(600, e.clientX - filtersWidth));
+      setResultsPanelWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      if (isResizing.current) {
+        isResizing.current = false;
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      }
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -246,7 +283,14 @@ function HomeContent() {
         </div>
       )}
 
-      <main className="app-main">
+      <main 
+        className="app-main"
+        style={{
+          gridTemplateColumns: breakpoint === "desktop" && resultsPanelWidth
+            ? `240px ${resultsPanelWidth}px 1fr` 
+            : undefined
+        }}
+      >
         <div
           className={`panel-filters ${mobileTab === "filters" ? "mobile-active" : ""}`}
         >
@@ -270,6 +314,17 @@ function HomeContent() {
             filterOperator={filterOperator}
             filterType={filterType}
           />
+          {breakpoint === "desktop" && (
+            <div 
+              className="resize-handle"
+              onMouseDown={handleResizeStart}
+              role="separator"
+              aria-valuenow={resultsPanelWidth || 0}
+              aria-valuemin={250}
+              aria-valuemax={600}
+              aria-label="Resize results panel"
+            />
+          )}
         </div>
 
         <div

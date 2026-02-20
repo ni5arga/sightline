@@ -525,9 +525,15 @@ body {
 }
 
 .panel-filters,
-.panel-results,
 .panel-map {
   display: contents;
+}
+
+.panel-results {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .mobile-nav {
@@ -550,6 +556,39 @@ body {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
+}
+
+.resize-handle {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 8px;
+  height: 100%;
+  cursor: ew-resize;
+  background: transparent;
+  transition: background 0.15s ease;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resize-handle::before {
+  content: '';
+  width: 2px;
+  height: 100%;
+  background: var(--border-primary);
+  transition: background 0.15s ease;
+}
+
+.resize-handle:hover::before {
+  background: var(--accent);
+  width: 3px;
+}
+
+.resize-handle:active::before {
+  background: var(--accent);
+  width: 4px;
 }
 
 .filters-empty {
@@ -730,6 +769,8 @@ body {
   border-right: 1px solid var(--border-primary);
   overflow: hidden;
   min-height: 0;
+  flex: 1;
+  height: 100%;
 }
 
 .results-empty {
