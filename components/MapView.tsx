@@ -15,6 +15,7 @@ import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import type { Asset } from "@/lib/types";
+import AssetInfoModal from "./AssetInfoModal";
 
 interface MapViewProps {
   results: Asset[];
@@ -248,6 +249,8 @@ export default function MapView({
   filterType,
 }: MapViewProps) {
   const [showClusters, setShowClusters] = useState(true);
+  const [modalAsset, setModalAsset] = useState<Asset | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const prevShowClustersRef = useRef<boolean>(true);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
@@ -261,6 +264,11 @@ export default function MapView({
   const prevSelectedIdRef = useRef<string | null>(null);
   const hasNavigatedToSelectionRef = useRef<boolean>(false);
   const userInteractingRef = useRef<boolean>(false);
+  const resultsRef = useRef<Asset[]>(results);
+
+  useEffect(() => {
+    resultsRef.current = results;
+  }, [results]);
 
   const filteredResults = useMemo(() => {
     let filtered = results;
@@ -397,10 +405,28 @@ export default function MapView({
     map.on("dragend", handleMoveEnd);
     map.on("zoomend", handleMoveEnd);
 
+    const handlePopupClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const button = target.closest(".popup-more-info-btn") as HTMLButtonElement;
+      if (button) {
+        const assetId = button.getAttribute("data-asset-id");
+        if (assetId) {
+          const asset = resultsRef.current.find((r) => r.id === assetId);
+          if (asset) {
+            setModalAsset(asset);
+            setIsModalOpen(true);
+          }
+        }
+      }
+    };
+
+    document.addEventListener("click", handlePopupClick);
+
     mapRef.current = map;
 
     return () => {
       isMapMountedRef.current = false;
+      document.removeEventListener("click", handlePopupClick);
       map.off("baselayerchange", handleBaseLayerChange);
       map.off("dragstart", handleInteractionStart);
       map.off("zoomstart", handleInteractionStart);
@@ -441,7 +467,10 @@ export default function MapView({
         ${safeOperator ? `<div class="popup-operator">${safeOperator}</div>` : ""}
         <div class="popup-coords">${asset.lat.toFixed(5)}, ${asset.lon.toFixed(5)}</div>
         ${tags ? `<table class="popup-tags">${tags}</table>` : ""}
-        <a class="popup-osm-link" href="https://www.openstreetmap.org/${asset.id}" target="_blank" rel="noopener noreferrer">View on OSM</a>
+        <div class="popup-links">
+          <button class="popup-more-info-btn" data-asset-id="${escapeHtml(asset.id)}">More Info</button>
+          <a class="popup-osm-link" href="https://www.openstreetmap.org/${asset.id}" target="_blank" rel="noopener noreferrer">View on OSM</a>
+        </div>
       </div>
     `;
   }, []);
@@ -756,50 +785,57 @@ export default function MapView({
   }, [selectedId, showClusters]);
 
   return (
-    <div className="map-container">
-      <div
-        style={{
-          position: "absolute",
-          zIndex: 401,
-          left: 12,
-          bottom: 12,
-          minWidth: 0,
-          background: "#161b22",
-          borderRadius: 6,
-          boxShadow: "0 2px 8px 0 rgba(0,0,0,0.3)",
-          border: "1px solid #30363d",
-          padding: "6px 10px",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          fontSize: 13,
-          fontWeight: 500,
-          lineHeight: 1.2,
-        }}
-      >
-        <input
-          id="cluster-toggle"
-          type="checkbox"
-          checked={showClusters}
-          onChange={e => setShowClusters(e.target.checked)}
+    <>
+      <div className="map-container">
+        <div
           style={{
-            accentColor: '#58a6ff',
-            width: 16,
-            height: 16,
-            cursor: 'pointer',
-            verticalAlign: 'middle',
+            position: "absolute",
+            zIndex: 401,
+            left: 12,
+            bottom: 12,
+            minWidth: 0,
+            background: "#161b22",
+            borderRadius: 6,
+            boxShadow: "0 2px 8px 0 rgba(0,0,0,0.3)",
+            border: "1px solid #30363d",
+            padding: "6px 10px",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            fontSize: 13,
+            fontWeight: 500,
+            lineHeight: 1.2,
           }}
-        />
-        <label htmlFor="cluster-toggle" style={{ cursor: 'pointer', userSelect: 'none', color: '#e6edf3', letterSpacing: '-0.01em', padding: 0, margin: 0 }}>
-          <span style={{ verticalAlign: 'middle' }}>Cluster Markers</span>
-        </label>
-      </div>
-      <div ref={containerRef} className="map-inner" />
-      {filteredResults.length === 0 && results.length > 0 && (
-        <div className="map-overlay">
-          <span>No results match current filters</span>
+        >
+          <input
+            id="cluster-toggle"
+            type="checkbox"
+            checked={showClusters}
+            onChange={e => setShowClusters(e.target.checked)}
+            style={{
+              accentColor: '#58a6ff',
+              width: 16,
+              height: 16,
+              cursor: 'pointer',
+              verticalAlign: 'middle',
+            }}
+          />
+          <label htmlFor="cluster-toggle" style={{ cursor: 'pointer', userSelect: 'none', color: '#e6edf3', letterSpacing: '-0.01em', padding: 0, margin: 0 }}>
+            <span style={{ verticalAlign: 'middle' }}>Cluster Markers</span>
+          </label>
         </div>
-      )}
-    </div>
+        <div ref={containerRef} className="map-inner" />
+        {filteredResults.length === 0 && results.length > 0 && (
+          <div className="map-overlay">
+            <span>No results match current filters</span>
+          </div>
+        )}
+      </div>
+      <AssetInfoModal
+        asset={modalAsset}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </>
   );
 }

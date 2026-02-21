@@ -222,19 +222,6 @@ function HomeContent() {
       <header className="app-header">
         <div className="header-content">
           <div className="logo">
-            <svg
-              className="logo-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <circle cx="12" cy="12" r="3" strokeWidth="2" />
-              <path
-                strokeLinecap="round"
-                strokeWidth="2"
-                d="M12 2v4m0 12v4M2 12h4m12 0h4m-2.93-7.07l-2.83 2.83m-8.48 8.48l-2.83 2.83m14.14 0l-2.83-2.83M6.34 6.34L3.51 3.51"
-              />
-            </svg>
             <span className="logo-text">Sightline</span>
           </div>
 

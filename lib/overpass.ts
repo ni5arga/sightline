@@ -50,13 +50,8 @@ export function buildOverpassQuery(
     operatorFilter = `["operator"~"${operator}",i]`;
   }
 
-  // Use area filter if available for precise geographic boundaries
-  let locationFilter = '';
-  if (areaId) {
-    locationFilter = `(area:${areaId})`;
-  } else {
-    locationFilter = `(${bboxStr})`;
-  }
+  // Always use bounding box for more reliable geographic filtering
+  const locationFilter = `(${bboxStr})`;
 
   // Handle osmTags as either a single object or array of objects (OR conditions)
   const osmTagsArray = Array.isArray(typeConfig.osmTags) ? typeConfig.osmTags : [typeConfig.osmTags];
@@ -87,13 +82,8 @@ export function buildMultiTypeQuery(
 ): string {
   const bboxStr = `${bbox[0]},${bbox[2]},${bbox[1]},${bbox[3]}`;
   
-  // Use area filter if available for precise geographic boundaries
-  let locationFilter = '';
-  if (areaId) {
-    locationFilter = `(area:${areaId})`;
-  } else {
-    locationFilter = `(${bboxStr})`;
-  }
+  // Always use bounding box for more reliable geographic filtering
+  const locationFilter = `(${bboxStr})`;
   
   const query = `
 [out:json][timeout:25][maxsize:50000000];
@@ -161,7 +151,7 @@ export async function executeQuery(query: string): Promise<Asset[]> {
         operator: tags.operator || null,
         lat,
         lon,
-        tags: filterTags(tags)
+        tags
       };
     });
 }
@@ -201,22 +191,6 @@ function extractType(tags: Record<string, string>): string {
   if (tags.building === 'industrial') return 'factory';
   
   return 'infrastructure';
-}
-
-function filterTags(tags: Record<string, string>): Record<string, string> {
-  const relevant = [
-    'name', 'operator', 'power', 'voltage', 'capacity',
-    'height', 'tower:type', 'building', 'aeroway', 'ref',
-    'start_date', 'website', 'phone', 'description'
-  ];
-  
-  const filtered: Record<string, string> = {};
-  for (const key of relevant) {
-    if (tags[key]) {
-      filtered[key] = tags[key];
-    }
-  }
-  return filtered;
 }
 
 export function calculateStats(assets: Asset[]): { 
