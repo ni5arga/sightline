@@ -9,14 +9,6 @@
  */
 
 import { useEffect, useRef, useCallback, useMemo, useState } from "react";
-// Blue dot icon for non-clustered mode
-const blueDotIcon = L.divIcon({
-  className: "marker-bluedot",
-  html: '<div style="background:#2196f3;border-radius:50%;width:12px;height:12px;border:2px solid #111;"></div>',
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
-  popupAnchor: [0, -8],
-});
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster";
@@ -33,14 +25,12 @@ interface MapViewProps {
   filterType: string | null;
 }
 
-/** Escapes HTML entities to prevent XSS in dynamically generated popup content. */
 function escapeHtml(text: string): string {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
 }
 
-/** Base layer configuration interface */
 interface LayerConfig {
   readonly url: string;
   readonly attribution: string;
@@ -51,7 +41,6 @@ interface LayerConfig {
   readonly subdomains?: string;
 }
 
-/** Available map layer configurations */
 const LAYERS: Readonly<Record<string, LayerConfig>> = Object.freeze({
   osm: {
     url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -85,61 +74,37 @@ const LAYERS: Readonly<Record<string, LayerConfig>> = Object.freeze({
   },
 });
 
-/** Default layer key */
 const DEFAULT_LAYER_KEY = "osm" as const;
-
-/** Storage key for persisting layer preference */
 const LAYER_STORAGE_KEY = "sightline-map-layer" as const;
-
-/** Transparent 1x1 PNG for failed tiles */
 const TRANSPARENT_TILE =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
-
-/** Number of tile errors before switching to fallback */
 const TILE_ERROR_THRESHOLD = 5;
 
-/**
- * Safely retrieves the stored layer preference from localStorage.
- * Returns null if unavailable, invalid, or in SSR context.
- */
 function getStoredLayerPreference(): string | null {
   if (typeof window === "undefined") return null;
   try {
     const stored = localStorage.getItem(LAYER_STORAGE_KEY);
-    // Validate that stored value is a valid layer key
     if (stored && stored in LAYERS) {
       return stored;
     }
     return null;
   } catch {
-    // localStorage may throw in private browsing or when disabled
     return null;
   }
 }
 
-/**
- * Safely stores the layer preference to localStorage.
- * Silently fails if storage is unavailable.
- */
 function setStoredLayerPreference(layerKey: string): void {
   if (typeof window === "undefined") return;
-  // Only store valid layer keys
   if (!(layerKey in LAYERS)) return;
   try {
     localStorage.setItem(LAYER_STORAGE_KEY, layerKey);
-  } catch {
-    // Ignore storage errors (quota exceeded, private browsing, etc.)
-  }
+  } catch {}
 }
 
 const DEFAULT_CENTER: L.LatLngExpression = [20, 0];
 const DEFAULT_ZOOM = 2;
 const SELECTED_ZOOM = 14;
 
-/**
- * Adaptive clustering thresholds.
- * Performance settings scale based on marker count to balance responsiveness with visual quality.
- */
 const CLUSTER_THRESHOLDS = {
   SMALL: 100,
   MEDIUM: 1000,
@@ -196,7 +161,6 @@ const CLUSTER_CONFIGS: Readonly<Record<string, ClusterConfig>> = Object.freeze({
   },
 });
 
-/** Returns optimized cluster settings based on dataset size for best performance/UX balance. */
 function getClusterConfig(markerCount: number): ClusterConfig {
   if (markerCount < CLUSTER_THRESHOLDS.SMALL) {
     return CLUSTER_CONFIGS.small;
@@ -208,7 +172,6 @@ function getClusterConfig(markerCount: number): ClusterConfig {
   return CLUSTER_CONFIGS.massive;
 }
 
-/** Validates geographic coordinates to prevent invalid markers from corrupting the map state. */
 function isValidCoordinate(lat: number, lon: number): boolean {
   return (
     typeof lat === "number" &&
@@ -222,7 +185,6 @@ function isValidCoordinate(lat: number, lon: number): boolean {
   );
 }
 
-/** Formats large numbers for cluster display (e.g., 1.2K, 15K, 1.5M) to improve readability. */
 function formatClusterCount(count: number): string {
   if (count < 1000) {
     return String(count);
@@ -269,6 +231,14 @@ const selectedIcon = L.divIcon({
   popupAnchor: [0, -8],
 });
 
+const blueDotIcon = L.divIcon({
+  className: "marker-bluedot",
+  html: '<div style="background:#2196f3;border-radius:50%;width:12px;height:12px;border:2px solid #111;"></div>',
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+  popupAnchor: [0, -8],
+});
+
 export default function MapView({
   results,
   bounds,
@@ -277,25 +247,16 @@ export default function MapView({
   filterOperator,
   filterType,
 }: MapViewProps) {
-  // Cluster toggle state
   const [showClusters, setShowClusters] = useState(true);
   const prevShowClustersRef = useRef<boolean>(true);
-
-  // Core map instance and marker storage
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
   const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Tile layer management
   const layerControlRef = useRef<L.Control.Layers | null>(null);
   const tileLayersRef = useRef<Map<string, L.TileLayer>>(new Map());
   const activeLayerRef = useRef<string>("osm");
-
-  // Lifecycle tracking
   const isMapMountedRef = useRef<boolean>(true);
-
-  // Selection state tracking to differentiate user clicks from programmatic selection
   const selectionSourceRef = useRef<"marker" | "external" | null>(null);
   const prevSelectedIdRef = useRef<string | null>(null);
   const hasNavigatedToSelectionRef = useRef<boolean>(false);
@@ -315,11 +276,9 @@ export default function MapView({
     return filtered;
   }, [results, filterOperator, filterType]);
 
-  // Map initialization effect - runs once on mount
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    // Reset mounted flag for re-mount scenarios (React Strict Mode, hot reload)
     isMapMountedRef.current = true;
 
     const map = L.map(containerRef.current, {
@@ -338,17 +297,12 @@ export default function MapView({
         crossOrigin: "anonymous",
       });
 
-      // Automatic fallback: switch to backup tile server after repeated failures
       let errorCount = 0;
       let hasSwitchedToFallback = false;
 
       layer.on("tileerror", () => {
         errorCount++;
-        if (
-          errorCount >= TILE_ERROR_THRESHOLD &&
-          config.fallbackUrl &&
-          !hasSwitchedToFallback
-        ) {
+        if (errorCount >= TILE_ERROR_THRESHOLD && config.fallbackUrl && !hasSwitchedToFallback) {
           hasSwitchedToFallback = true;
           layer.setUrl(config.fallbackUrl);
           errorCount = 0;
@@ -422,11 +376,7 @@ export default function MapView({
 
     const handleMoveEnd = () => {
       handleInteractionEnd();
-
-      // Auto-close popups when their marker scrolls out of view
-      const openPopup = map
-        .getPane("popupPane")
-        ?.querySelector(".leaflet-popup");
+      const openPopup = map.getPane("popupPane")?.querySelector(".leaflet-popup");
       if (openPopup) {
         const currentMarkers = markersRef.current;
         for (const [, marker] of currentMarkers) {
@@ -471,7 +421,6 @@ export default function MapView({
     };
   }, []);
 
-  /** Generates popup HTML content with XSS-safe escaping. */
   const createPopupContent = useCallback((asset: Asset): string => {
     const safeName = escapeHtml(asset.name);
     const safeType = escapeHtml(asset.type);
@@ -497,14 +446,12 @@ export default function MapView({
     `;
   }, []);
 
-  // Marker rendering effect - clusters or blue dots
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
     const currentMarkers = markersRef.current;
 
-    // Clean up existing cluster group
     if (markerClusterRef.current) {
       try {
         markerClusterRef.current.clearLayers();
@@ -617,7 +564,6 @@ export default function MapView({
         map.addLayer(markerCluster);
       }
     } else {
-      // Show blue dots for all points, no clustering
       for (const asset of validResults) {
         try {
           const marker = L.marker([asset.lat, asset.lon], {
@@ -658,7 +604,6 @@ export default function MapView({
       }
     }
 
-    // Auto-fit bounds to results when markers are updated, but not when just toggling clusters
     const isJustTogglingClusters = prevShowClustersRef.current !== showClusters && filteredResults.length === validResults.length;
     prevShowClustersRef.current = showClusters;
 
@@ -696,7 +641,6 @@ export default function MapView({
     };
   }, [filteredResults, bounds, onSelect, createPopupContent, showClusters]);
 
-  // Selection handling effect - updates marker icons and manages popup/navigation
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !isMapMountedRef.current) return;
@@ -713,7 +657,11 @@ export default function MapView({
 
     currentMarkers.forEach((marker, id) => {
       try {
-        marker.setIcon(id === selectedId ? selectedIcon : defaultIcon);
+        if (id === selectedId) {
+          marker.setIcon(selectedIcon);
+        } else {
+          marker.setIcon(showClusters ? defaultIcon : blueDotIcon);
+        }
       } catch {}
     });
 
@@ -726,66 +674,40 @@ export default function MapView({
 
     if (selectedId && isNewSelection) {
       const selectedMarker = currentMarkers.get(selectedId);
+      const isMarkerClick = selectionSource === "marker";
 
       if (selectedMarker) {
-        if (selectionSource === "marker") {
-          // Marker was clicked directly - Leaflet handles popup, just track state
-          hasNavigatedToSelectionRef.current = true;
+        if (isMarkerClick) {
           selectionSourceRef.current = null;
-        } else {
-          // External selection (ResultList, URL) - navigate to marker if needed
-          if (
-            !hasNavigatedToSelectionRef.current &&
-            !userInteractingRef.current
-          ) {
-            const latLng = selectedMarker.getLatLng();
-            const markerCluster = markerClusterRef.current;
+        }
+        
+        if (isMarkerClick) {
+          hasNavigatedToSelectionRef.current = true;
+        } else if (!userInteractingRef.current) {
+          const latLng = selectedMarker.getLatLng();
+          hasNavigatedToSelectionRef.current = true;
 
-            hasNavigatedToSelectionRef.current = true;
+          const currentZoom = map.getZoom();
+          const targetZoom = Math.max(currentZoom, SELECTED_ZOOM);
+          const containerSize = map.getSize();
+          const offsetY = containerSize.y * 0.2;
+          const targetPoint = map.project(latLng, targetZoom);
+          const offsetPoint = L.point(
+            targetPoint.x,
+            targetPoint.y - offsetY,
+          );
+          const offsetLatLng = map.unproject(offsetPoint, targetZoom);
 
-            // If marker is in a cluster, use zoomToShowLayer to expand it
-            if (markerCluster && map.hasLayer(markerCluster) && showClusters) {
-              markerCluster.zoomToShowLayer(selectedMarker, () => {
-                // Open popup after cluster has been expanded
-                setTimeout(() => {
-                  if (isMapMountedRef.current && selectedMarker) {
-                    selectedMarker.openPopup();
-                  }
-                }, 100);
-              });
-            } else {
-              // No clustering or marker is already visible
-              const currentZoom = map.getZoom();
-              const currentBounds = map.getBounds();
-              const isMarkerVisible = currentBounds.contains(latLng);
-              const isZoomedInEnough = currentZoom >= SELECTED_ZOOM;
+          map.flyTo(offsetLatLng, targetZoom, {
+            animate: true,
+            duration: 0.8,
+          });
 
-              if (isMarkerVisible && isZoomedInEnough) {
-                selectedMarker.openPopup();
-              } else {
-                const targetZoom = Math.max(currentZoom, SELECTED_ZOOM);
-                const containerSize = map.getSize();
-                const offsetY = containerSize.y * 0.2;
-                const targetPoint = map.project(latLng, targetZoom);
-                const offsetPoint = L.point(
-                  targetPoint.x,
-                  targetPoint.y - offsetY,
-                );
-                const offsetLatLng = map.unproject(offsetPoint, targetZoom);
-
-                map.flyTo(offsetLatLng, targetZoom, {
-                  animate: true,
-                  duration: 0.5,
-                });
-
-                const onMoveEnd = () => {
-                  selectedMarker.openPopup();
-                  map.off("moveend", onMoveEnd);
-                };
-                map.on("moveend", onMoveEnd);
-              }
+          map.once("moveend", () => {
+            if (isMapMountedRef.current && selectedMarker) {
+              selectedMarker.openPopup();
             }
-          }
+          });
         }
       }
     }
@@ -795,7 +717,6 @@ export default function MapView({
 
   return (
     <div className="map-container">
-      {/* Cluster toggle in bottom-left corner */}
       <div
         style={{
           position: "absolute",
