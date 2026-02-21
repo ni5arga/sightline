@@ -687,27 +687,67 @@ export default function MapView({
           const latLng = selectedMarker.getLatLng();
           hasNavigatedToSelectionRef.current = true;
 
-          const currentZoom = map.getZoom();
-          const targetZoom = Math.max(currentZoom, SELECTED_ZOOM);
-          const containerSize = map.getSize();
-          const offsetY = containerSize.y * 0.2;
-          const targetPoint = map.project(latLng, targetZoom);
-          const offsetPoint = L.point(
-            targetPoint.x,
-            targetPoint.y - offsetY,
-          );
-          const offsetLatLng = map.unproject(offsetPoint, targetZoom);
+          const markerCluster = markerClusterRef.current;
+          
+          if (markerCluster && map.hasLayer(markerCluster) && showClusters) {
+            const visibleLayer = markerCluster.getVisibleParent(selectedMarker);
+            const isInCollapsedCluster = visibleLayer !== selectedMarker;
+            const isInViewport = map.getBounds().contains(latLng);
+            
+            if (isInCollapsedCluster || !isInViewport) {
+              markerCluster.zoomToShowLayer(selectedMarker, () => {
+                setTimeout(() => {
+                  if (isMapMountedRef.current && selectedMarker) {
+                    selectedMarker.openPopup();
+                  }
+                }, 100);
+              });
+            } else {
+              const currentZoom = map.getZoom();
+              const targetZoom = Math.max(currentZoom, SELECTED_ZOOM);
+              const containerSize = map.getSize();
+              const offsetY = containerSize.y * 0.2;
+              const targetPoint = map.project(latLng, targetZoom);
+              const offsetPoint = L.point(
+                targetPoint.x,
+                targetPoint.y - offsetY,
+              );
+              const offsetLatLng = map.unproject(offsetPoint, targetZoom);
 
-          map.flyTo(offsetLatLng, targetZoom, {
-            animate: true,
-            duration: 0.5,
-          });
+              map.flyTo(offsetLatLng, targetZoom, {
+                animate: true,
+                duration: 0.8,
+              });
 
-          map.once("moveend", () => {
-            if (isMapMountedRef.current && selectedMarker) {
-              selectedMarker.openPopup();
+              map.once("moveend", () => {
+                if (isMapMountedRef.current && selectedMarker) {
+                  selectedMarker.openPopup();
+                }
+              });
             }
-          });
+          } else {
+            const currentZoom = map.getZoom();
+            const targetZoom = Math.max(currentZoom, SELECTED_ZOOM);
+            const containerSize = map.getSize();
+            const offsetY = containerSize.y * 0.2;
+            const targetPoint = map.project(latLng, targetZoom);
+            const offsetPoint = L.point(
+              targetPoint.x,
+              targetPoint.y - offsetY,
+            );
+            const offsetLatLng = map.unproject(offsetPoint, targetZoom);
+
+            map.flyTo(offsetLatLng, targetZoom, {
+              animate: true,
+              duration: 0.8,
+            });
+
+            map.once("moveend", () => {
+              if (isMapMountedRef.current && selectedMarker) {
+                selectedMarker.openPopup();
+              }
+            });
+          }
         }
       }
     }

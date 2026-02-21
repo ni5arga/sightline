@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useEffect } from "react";
+import { useCallback, useMemo, useRef, useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Asset } from "@/lib/types";
 
@@ -21,6 +21,7 @@ export default function ResultList({
 }: ResultListProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<HTMLButtonElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const filteredResults = useMemo(() => {
     let filtered = results;
@@ -33,8 +34,22 @@ export default function ResultList({
       filtered = filtered.filter((r) => r.type === filterType);
     }
 
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((asset) => {
+        return (
+          asset.name.toLowerCase().includes(query) ||
+          asset.type.toLowerCase().includes(query) ||
+          (asset.operator && asset.operator.toLowerCase().includes(query)) ||
+          Object.values(asset.tags).some((value) =>
+            String(value).toLowerCase().includes(query)
+          )
+        );
+      });
+    }
+
     return filtered;
-  }, [results, filterOperator, filterType]);
+  }, [results, filterOperator, filterType, searchQuery]);
 
   useEffect(() => {
     if (selectedRef.current && scrollAreaRef.current) {
