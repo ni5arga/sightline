@@ -131,19 +131,10 @@ export default function ResultList({
         </span>
       </div>
 
-      <div style={{ padding: "0 12px 8px 12px" }}>
-        <div style={{ position: "relative" }}>
+      <div className="results-search-container">
+        <div className="results-search-wrapper">
           <svg
-            style={{
-              position: "absolute",
-              left: 10,
-              top: "50%",
-              transform: "translateY(-50%)",
-              width: 14,
-              height: 14,
-              color: "#7d8590",
-              pointerEvents: "none",
-            }}
+            className="results-search-icon"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -156,50 +147,12 @@ export default function ResultList({
             placeholder="Search results..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "6px 10px 6px 32px",
-              fontSize: 13,
-              background: "#0d1117",
-              border: "1px solid #30363d",
-              borderRadius: 6,
-              color: "#e6edf3",
-              outline: "none",
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = "#58a6ff";
-              e.target.style.background = "#161b22";
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = "#30363d";
-              e.target.style.background = "#0d1117";
-            }}
+            className="results-search-input"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              style={{
-                position: "absolute",
-                right: 8,
-                top: "50%",
-                transform: "translateY(-50%)",
-                width: 16,
-                height: 16,
-                padding: 0,
-                background: "none",
-                border: "none",
-                color: "#7d8590",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = "#e6edf3";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = "#7d8590";
-              }}
+              className="results-search-clear"
               title="Clear search"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -213,18 +166,9 @@ export default function ResultList({
       <ScrollArea ref={scrollAreaRef} className="results-list-scroll">
         <div className="results-list-content">
           {filteredResults.length === 0 && searchQuery ? (
-            <div style={{
-              padding: "48px 24px",
-              textAlign: "center",
-              color: "#7d8590",
-            }}>
+            <div className="results-search-empty">
               <svg
-                style={{
-                  width: 48,
-                  height: 48,
-                  margin: "0 auto 12px",
-                  opacity: 0.5,
-                }}
+                className="results-search-empty-icon"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -232,8 +176,8 @@ export default function ResultList({
                 <circle cx="11" cy="11" r="8" strokeWidth="2" />
                 <path d="m21 21-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
               </svg>
-              <p style={{ fontSize: 14, marginBottom: 4 }}>No matches found</p>
-              <p style={{ fontSize: 13 }}>Try a different search term</p>
+              <p className="results-search-empty-title">No matches found</p>
+              <p className="results-search-empty-hint">Try a different search term</p>
             </div>
           ) : (
             filteredResults.map((asset, index) => (
