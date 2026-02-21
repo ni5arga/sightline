@@ -519,7 +519,7 @@ body {
 
 .app-main {
   display: grid;
-  grid-template-columns: 240px 1fr 45%;
+  grid-template-columns: 240px 400px 1fr;
   flex: 1;
   overflow: hidden;
 }

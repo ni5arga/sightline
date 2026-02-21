@@ -83,7 +83,7 @@ function HomeContent() {
 
   // UI state
   const [mobileTab, setMobileTab] = useState<MobileTab>("map");
-  const [resultsPanelWidth, setResultsPanelWidth] = useState<number | null>(null);
+  const [resultsPanelWidth, setResultsPanelWidth] = useState<number>(400);
   const breakpoint = useBreakpoint();
 
   // Refs for URL sync
@@ -273,7 +273,7 @@ function HomeContent() {
       <main 
         className="app-main"
         style={{
-          gridTemplateColumns: breakpoint === "desktop" && resultsPanelWidth
+          gridTemplateColumns: breakpoint === "desktop"
             ? `240px ${resultsPanelWidth}px 1fr` 
             : undefined
         }}
