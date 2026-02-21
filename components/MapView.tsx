@@ -700,7 +700,7 @@ export default function MapView({
 
           map.flyTo(offsetLatLng, targetZoom, {
             animate: true,
-            duration: 0.8,
+            duration: 0.5,
           });
 
           map.once("moveend", () => {
