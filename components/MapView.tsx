@@ -452,8 +452,11 @@ export default function MapView({
     const safeType = escapeHtml(asset.type);
     const safeOperator = asset.operator ? escapeHtml(asset.operator) : null;
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const maxTags = isMobile ? 3 : 5;
+    
     const tags = Object.entries(asset.tags)
-      .slice(0, 5)
+      .slice(0, maxTags)
       .map(
         ([k, v]) =>
           `<tr><td class="popup-key">${escapeHtml(k)}</td><td class="popup-value">${escapeHtml(String(v))}</td></tr>`,
@@ -704,6 +707,7 @@ export default function MapView({
     if (selectedId && isNewSelection) {
       const selectedMarker = currentMarkers.get(selectedId);
       const isMarkerClick = selectionSource === "marker";
+      const isMobile = window.innerWidth <= 768;
 
       if (selectedMarker) {
         if (isMarkerClick) {
@@ -712,7 +716,7 @@ export default function MapView({
         
         if (isMarkerClick) {
           hasNavigatedToSelectionRef.current = true;
-        } else if (!userInteractingRef.current) {
+        } else if (!userInteractingRef.current || isMobile) {
           const latLng = selectedMarker.getLatLng();
           hasNavigatedToSelectionRef.current = true;
 
@@ -729,13 +733,13 @@ export default function MapView({
                   if (isMapMountedRef.current && selectedMarker) {
                     selectedMarker.openPopup();
                   }
-                }, 100);
+                }, isMobile ? 200 : 100);
               });
             } else {
               const currentZoom = map.getZoom();
               const targetZoom = Math.max(currentZoom, SELECTED_ZOOM);
               const containerSize = map.getSize();
-              const offsetY = containerSize.y * 0.2;
+              const offsetY = isMobile ? containerSize.y * 0.35 : containerSize.y * 0.2;
               const targetPoint = map.project(latLng, targetZoom);
               const offsetPoint = L.point(
                 targetPoint.x,
@@ -745,20 +749,22 @@ export default function MapView({
 
               map.flyTo(offsetLatLng, targetZoom, {
                 animate: true,
-                duration: 0.8,
+                duration: isMobile ? 1.0 : 0.8,
               });
 
               map.once("moveend", () => {
-                if (isMapMountedRef.current && selectedMarker) {
-                  selectedMarker.openPopup();
-                }
+                setTimeout(() => {
+                  if (isMapMountedRef.current && selectedMarker) {
+                    selectedMarker.openPopup();
+                  }
+                }, isMobile ? 100 : 0);
               });
             }
           } else {
             const currentZoom = map.getZoom();
             const targetZoom = Math.max(currentZoom, SELECTED_ZOOM);
             const containerSize = map.getSize();
-            const offsetY = containerSize.y * 0.2;
+            const offsetY = isMobile ? containerSize.y * 0.35 : containerSize.y * 0.2;
             const targetPoint = map.project(latLng, targetZoom);
             const offsetPoint = L.point(
               targetPoint.x,
@@ -768,13 +774,15 @@ export default function MapView({
 
             map.flyTo(offsetLatLng, targetZoom, {
               animate: true,
-              duration: 0.8,
+              duration: isMobile ? 1.0 : 0.8,
             });
 
             map.once("moveend", () => {
-              if (isMapMountedRef.current && selectedMarker) {
-                selectedMarker.openPopup();
-              }
+              setTimeout(() => {
+                if (isMapMountedRef.current && selectedMarker) {
+                  selectedMarker.openPopup();
+                }
+              }, isMobile ? 100 : 0);
             });
           }
         }
