@@ -1833,16 +1833,19 @@ body {
   }
 
   .popup-links {
-    gap: 8px;
-    margin-top: 10px;
+    gap: 6px !important;
+    margin-top: 8px !important;
+    flex-direction: row !important;
   }
 
   .popup-more-info-btn,
   .popup-osm-link {
-    padding: 11px 14px !important;
-    font-size: 14px !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
+    padding: 8px 10px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    width: auto !important;
+    flex: 1 !important;
   }
 
   .dark-popup .leaflet-popup-close-button {
@@ -1973,10 +1976,16 @@ body {
     font-size: 15px !important;
   }
 
+  .popup-links {
+    flex-direction: row !important;
+  }
+
   .popup-more-info-btn,
   .popup-osm-link {
-    padding: 10px 12px !important;
-    font-size: 13px !important;
+    padding: 7px 9px !important;
+    font-size: 12px !important;
+    width: auto !important;
+    flex: 1 !important;
   }
 }
 
