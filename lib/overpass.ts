@@ -222,6 +222,11 @@ function extractType(tags: Record<string, string>): string {
   if (tags.aeroway === 'aerodrome') return 'airport';
   if (tags.aeroway === 'helipad') return 'helipad';
   if (tags.man_made === 'tower') return 'tower';
+  if (tags.man_made === 'communications_tower') return 'cell_tower';
+  if (tags.man_made === 'surveillance' && tags['surveillance:type'] === 'camera') return 'surveillance_camera';
+  if (tags.man_made === 'surveillance') return 'surveillance';
+  if (tags.man_made === 'antenna') return 'antenna';
+  if (tags.man_made === 'mast') return 'mast';
   if (tags.man_made === 'pipeline') return 'pipeline';
   if (tags.landuse === 'port') return 'port';
   if (tags.harbour) return 'harbour';
