@@ -55,10 +55,13 @@ export function buildOverpassQuery(
     operatorFilter = `["operator"~"${operator}",i]`;
   }
 
-  // Always use bounding box for more reliable geographic filtering
-  const locationFilter = `(${bboxStr})`;
+  let locationFilter = '';
+  if (areaId) {
+    locationFilter = `(area:${areaId})`;
+  } else {
+    locationFilter = `(${bboxStr})`;
+  }
 
-  // Handle osmTags as either a single object or array of objects (OR conditions)
   const osmTagsArray = Array.isArray(typeConfig.osmTags) ? typeConfig.osmTags : [typeConfig.osmTags];
   
   let unionParts: string[] = [];
@@ -87,8 +90,12 @@ export function buildMultiTypeQuery(
 ): string {
   const bboxStr = `${bbox[0]},${bbox[2]},${bbox[1]},${bbox[3]}`;
   
-  // Always use bounding box for more reliable geographic filtering
-  const locationFilter = `(${bboxStr})`;
+  let locationFilter = '';
+  if (areaId) {
+    locationFilter = `(area:${areaId})`;
+  } else {
+    locationFilter = `(${bboxStr})`;
+  }
   
   const query = `
 [out:json][timeout:25][maxsize:50000000];
