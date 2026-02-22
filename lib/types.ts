@@ -276,11 +276,25 @@ export const ASSET_TYPE_MAP: Record<string, { osmTags: Record<string, string | s
     label: 'Radar'
   },
   surveillance_camera: {
-    osmTags: { 'man_made': 'surveillance', 'surveillance:type': 'camera' },
+    osmTags: [
+      { 'man_made': 'surveillance', 'surveillance:type': 'camera' },
+      { 'man_made': 'surveillance', 'surveillance': 'outdoor' },
+      { 'man_made': 'surveillance', 'surveillance': 'indoor' },
+      { 'man_made': 'surveillance', 'surveillance': 'public' },
+      { 'surveillance:type': 'camera' },
+      { 'man_made': 'surveillance' }
+    ],
     label: 'Surveillance Camera'
   },
   cctv: {
-    osmTags: { 'man_made': 'surveillance', 'surveillance:type': 'camera' },
+    osmTags: [
+      { 'man_made': 'surveillance', 'surveillance:type': 'camera' },
+      { 'man_made': 'surveillance', 'surveillance': 'outdoor' },
+      { 'man_made': 'surveillance', 'surveillance': 'indoor' },
+      { 'man_made': 'surveillance', 'surveillance': 'public' },
+      { 'surveillance:type': 'camera' },
+      { 'man_made': 'surveillance' }
+    ],
     label: 'Surveillance Camera'
   },
   antenna: {
