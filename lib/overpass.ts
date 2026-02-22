@@ -1,6 +1,11 @@
 import { Asset, ASSET_TYPE_MAP } from './types';
 
-const OVERPASS_API = 'https://overpass-api.de/api/interpreter';
+const OVERPASS_APIS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter'
+];
+
 const TIMEOUT_MS = 30000;
 const MAX_RESULTS = 1000;
 
@@ -116,44 +121,77 @@ async function fetchWithTimeout(url: string, options: RequestInit, timeout: numb
 }
 
 export async function executeQuery(query: string): Promise<Asset[]> {
-  const response = await fetchWithTimeout(OVERPASS_API, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: `data=${encodeURIComponent(query)}`
-  }, TIMEOUT_MS);
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    if (response.status === 429) {
-      throw new Error('Rate limited by Overpass API. Please wait and try again.');
+  for (let i = 0; i < OVERPASS_APIS.length; i++) {
+    const apiEndpoint = OVERPASS_APIS[i];
+    
+    try {
+      const response = await fetchWithTimeout(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `data=${encodeURIComponent(query)}`
+      }, TIMEOUT_MS);
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          lastError = new Error(`Rate limited by ${apiEndpoint}`);
+          if (i < OVERPASS_APIS.length - 1) {
+            console.warn(`Rate limited by API ${i + 1}, trying next endpoint...`);
+            continue;
+          }
+        } else {
+          lastError = new Error(`API request failed with status ${response.status}`);
+          if (i < OVERPASS_APIS.length - 1) {
+            console.warn(`API ${i + 1} failed (${response.status}), trying next endpoint...`);
+            continue;
+          }
+        }
+        throw lastError;
+      }
+
+      const data: OverpassResponse = await response.json();
+      
+      if (i > 0) {
+        console.log(`Successfully fetched data from backup API endpoint ${i + 1}`);
+      }
+      
+      return data.elements
+        .filter(el => {
+          const lat = el.lat ?? el.center?.lat;
+          const lon = el.lon ?? el.center?.lon;
+          return lat !== undefined && lon !== undefined;
+        })
+        .map(el => {
+          const lat = el.lat ?? el.center!.lat;
+          const lon = el.lon ?? el.center!.lon;
+          const tags = el.tags || {};
+          
+          return {
+            id: `${el.type}/${el.id}`,
+            name: extractName(tags),
+            type: extractType(tags),
+            operator: tags.operator || null,
+            lat,
+            lon,
+            tags
+          };
+        });
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      
+      if (i < OVERPASS_APIS.length - 1) {
+        console.warn(`API ${i + 1} failed: ${lastError.message}, trying next endpoint...`);
+        continue;
+      }
+      
+      throw lastError;
     }
-    throw new Error(`Overpass API request failed: ${response.status}`);
   }
 
-  const data: OverpassResponse = await response.json();
-  
-  return data.elements
-    .filter(el => {
-      const lat = el.lat ?? el.center?.lat;
-      const lon = el.lon ?? el.center?.lon;
-      return lat !== undefined && lon !== undefined;
-    })
-    .map(el => {
-      const lat = el.lat ?? el.center!.lat;
-      const lon = el.lon ?? el.center!.lon;
-      const tags = el.tags || {};
-      
-      return {
-        id: `${el.type}/${el.id}`,
-        name: extractName(tags),
-        type: extractType(tags),
-        operator: tags.operator || null,
-        lat,
-        lon,
-        tags
-      };
-    });
+  throw lastError || new Error('All Overpass API endpoints failed');
 }
 
 function extractName(tags: Record<string, string>): string {
