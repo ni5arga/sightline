@@ -372,16 +372,6 @@ export default function MapView({
 
     map.zoomControl.setPosition("topright");
 
-    // Add "Report a map issue" link control (OSM tile policy recommendation)
-    const reportControl = L.Control.extend({
-      onAdd: function() {
-        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-report');
-        container.innerHTML = '<a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer" title="Report a map issue" style="padding: 4px 8px; display: block; text-decoration: none; color: #333; background: white; font-size: 12px;">Report issue</a>';
-        return container;
-      }
-    });
-    new reportControl({ position: 'bottomleft' }).addTo(map);
-
     const handleInteractionStart = () => {
       userInteractingRef.current = true;
     };
