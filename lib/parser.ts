@@ -134,7 +134,82 @@ const TYPE_PATTERNS = [
   { pattern: /\btoll\s*(?:booth|plaza|station)s?\b/i, type: 'toll_booth' },
   { pattern: /\bweigh\s*(?:station|bridge)s?\b/i, type: 'weigh_station' },
   { pattern: /\brest\s*(?:area|stop)s?\b/i, type: 'rest_area' },
-  { pattern: /\bservice\s*(?:area|station|plaza)s?\b/i, type: 'service_area' }
+  { pattern: /\bservice\s*(?:area|station|plaza)s?\b/i, type: 'service_area' },
+  // Cable Transport
+  { pattern: /\b(?:cable\s*car|aerial\s*tramway)s?\b/i, type: 'aerialway' },
+  { pattern: /\bgondolas?\b/i, type: 'gondola' },
+  { pattern: /\bfuniculars?\b/i, type: 'funicular' },
+  { pattern: /\bchairlifts?\b/i, type: 'chairlift' },
+  // Maritime additions
+  { pattern: /\bpiers?\b/i, type: 'pier' },
+  { pattern: /\bjett(?:y|ies)\b/i, type: 'jetty' },
+  { pattern: /\bslipways?\b/i, type: 'slipway' },
+  { pattern: /\bboat\s*lifts?\b/i, type: 'boat_lift' },
+  { pattern: /\bmoorings?\b/i, type: 'mooring' },
+  // Public Utilities
+  { pattern: /\bbicycle\s*(?:parking|rack)s?\b/i, type: 'bicycle_parking' },
+  { pattern: /\b(?:drinking\s*water|water\s*fountain)s?\b/i, type: 'drinking_water' },
+  { pattern: /\bpublic\s*toilets?\b/i, type: 'public_toilet' },
+  { pattern: /\bbenches?\b/i, type: 'bench' },
+  { pattern: /\b(?:waste|trash|rubbish)\s*(?:basket|bin)s?\b/i, type: 'waste_basket' },
+  // Energy Storage
+  { pattern: /\bbattery\s*storage\b/i, type: 'battery_storage' },
+  { pattern: /\bpower\s*converters?\b/i, type: 'converter' },
+  { pattern: /\bpower\s*switch(?:es)?\b/i, type: 'switch' },
+  // Street Infrastructure
+  { pattern: /\bstreet\s*(?:lamp|light)s?\b/i, type: 'street_lamp' },
+  { pattern: /\btraffic\s*(?:signal|light)s?\b/i, type: 'traffic_signals' },
+  // Emergency additions
+  { pattern: /\b(?:emergency\s*)?sirens?\b/i, type: 'siren' },
+  { pattern: /\bdefibrillators?\b/i, type: 'defibrillator' },
+  { pattern: /\bassembly\s*points?\b/i, type: 'assembly_point' },
+  { pattern: /\blife\s*rings?\b/i, type: 'life_ring' },
+  // Tourism
+  { pattern: /\btourist\s*information\b/i, type: 'information' },
+  { pattern: /\bpicnic\s*(?:site|area)s?\b/i, type: 'picnic_site' },
+  // Commercial
+  { pattern: /\bsupermarkets?\b/i, type: 'supermarket' },
+  { pattern: /\b(?:shopping\s*)?malls?\b/i, type: 'mall' },
+  { pattern: /\bmarketplaces?\b/i, type: 'marketplace' },
+  // Shared Mobility
+  { pattern: /\b(?:bike|bicycle)\s*(?:rental|sharing)\b/i, type: 'bicycle_rental' },
+  { pattern: /\bcar\s*sharing\b/i, type: 'car_sharing' },
+  // Science
+  { pattern: /\bplanetariums?\b/i, type: 'planetarium' },
+  { pattern: /\blaborator(?:y|ies)\b/i, type: 'laboratory' },
+  // Construction
+  { pattern: /\bconstruction\s*sites?\b/i, type: 'construction_site' },
+  // Food Production
+  { pattern: /\bwiner(?:y|ies)\b/i, type: 'winery' },
+  { pattern: /\bbaker(?:y|ies)\b/i, type: 'bakery' },
+  { pattern: /\bdair(?:y|ies)\b/i, type: 'dairy' },
+  // Transport Services
+  { pattern: /\btaxi\s*(?:stand|rank)s?\b/i, type: 'taxi_stand' },
+  { pattern: /\bbicycle\s*repair\b/i, type: 'bicycle_repair' },
+  { pattern: /\bcar\s*wash(?:es)?\b/i, type: 'car_wash' },
+  // Postal
+  { pattern: /\bpost\s*box(?:es)?\b/i, type: 'post_box' },
+  { pattern: /\bpublic\s*telephone?s?\b/i, type: 'telephone' },
+  { pattern: /\bphone\s*booth?s?\b/i, type: 'telephone' },
+  // Community
+  { pattern: /\bcommunity\s*cent(?:er|re)s?\b/i, type: 'community_centre' },
+  { pattern: /\bsocial\s*facilit(?:y|ies)\b/i, type: 'social_facility' },
+  { pattern: /\bshelters?\b/i, type: 'shelter' },
+  // Food Services
+  { pattern: /\brestaurants?\b/i, type: 'restaurant' },
+  { pattern: /\bcaf[eé]s?\b/i, type: 'cafe' },
+  { pattern: /\bfast\s*food\b/i, type: 'fast_food' },
+  // Recreation
+  { pattern: /\bplaygrounds?\b/i, type: 'playground' },
+  { pattern: /\bparks?\b/i, type: 'park' },
+  { pattern: /\b(?:sports\s*)?pitch(?:es)?\b/i, type: 'pitch' },
+  // Water Features
+  { pattern: /\bfountains?\b/i, type: 'fountain' },
+  { pattern: /\bwaterfalls?\b/i, type: 'waterfall' },
+  { pattern: /\bhot\s*springs?\b/i, type: 'hot_spring' },
+  // Monitoring
+  { pattern: /\bmonitoring\s*stations?\b/i, type: 'monitoring_station' },
+  { pattern: /\bweather\s*stations?\b/i, type: 'weather_station' }
 ];
 
 const NEAR_PATTERN = /\bnear\s+(.+?)(?:\s+(?:in|within|radius)|$)/i;

@@ -810,6 +810,245 @@ export const ASSET_TYPE_MAP: Record<string, { osmTags: Record<string, string | s
   atc_tower: {
     osmTags: { 'aeroway': 'control_tower' },
     label: 'ATC Tower'
+  },
+  // Public Utilities
+  bicycle_parking: {
+    osmTags: { 'amenity': 'bicycle_parking' },
+    label: 'Bicycle Parking'
+  },
+  drinking_water: {
+    osmTags: { 'amenity': 'drinking_water' },
+    label: 'Drinking Water'
+  },
+  public_toilet: {
+    osmTags: { 'amenity': 'toilets' },
+    label: 'Public Toilet'
+  },
+  bench: {
+    osmTags: { 'amenity': 'bench' },
+    label: 'Bench'
+  },
+  waste_basket: {
+    osmTags: { 'amenity': 'waste_basket' },
+    label: 'Waste Basket'
+  },
+  // Maritime additions
+  pier: {
+    osmTags: { 'man_made': 'pier' },
+    label: 'Pier'
+  },
+  jetty: {
+    osmTags: { 'man_made': 'jetty' },
+    label: 'Jetty'
+  },
+  slipway: {
+    osmTags: { 'leisure': 'slipway' },
+    label: 'Slipway'
+  },
+  boat_lift: {
+    osmTags: { 'waterway': 'boat_lift' },
+    label: 'Boat Lift'
+  },
+  mooring: {
+    osmTags: { 'waterway': 'mooring' },
+    label: 'Mooring'
+  },
+  // Cable Transport
+  aerialway: {
+    osmTags: { 'aerialway': 'cable_car' },
+    label: 'Cable Car'
+  },
+  gondola: {
+    osmTags: { 'aerialway': 'gondola' },
+    label: 'Gondola'
+  },
+  funicular: {
+    osmTags: { 'aerialway': 'funicular' },
+    label: 'Funicular'
+  },
+  chairlift: {
+    osmTags: { 'aerialway': 'chair_lift' },
+    label: 'Chairlift'
+  },
+  // Energy Storage & Distribution
+  battery_storage: {
+    osmTags: { 'power': 'generator', 'generator:source': 'battery' },
+    label: 'Battery Storage'
+  },
+  converter: {
+    osmTags: { 'power': 'converter' },
+    label: 'Power Converter'
+  },
+  switch: {
+    osmTags: { 'power': 'switch' },
+    label: 'Power Switch'
+  },
+  // Street Infrastructure
+  street_lamp: {
+    osmTags: { 'highway': 'street_lamp' },
+    label: 'Street Lamp'
+  },
+  traffic_signals: {
+    osmTags: { 'highway': 'traffic_signals' },
+    label: 'Traffic Signals'
+  },
+  // Emergency Infrastructure
+  siren: {
+    osmTags: { 'emergency': 'siren' },
+    label: 'Emergency Siren'
+  },
+  defibrillator: {
+    osmTags: { 'emergency': 'defibrillator' },
+    label: 'Defibrillator'
+  },
+  assembly_point: {
+    osmTags: { 'emergency': 'assembly_point' },
+    label: 'Assembly Point'
+  },
+  life_ring: {
+    osmTags: { 'emergency': 'life_ring' },
+    label: 'Life Ring'
+  },
+  // Tourism Infrastructure
+  information: {
+    osmTags: { 'tourism': 'information' },
+    label: 'Tourist Information'
+  },
+  picnic_site: {
+    osmTags: { 'tourism': 'picnic_site' },
+    label: 'Picnic Site'
+  },
+  // Commercial
+  supermarket: {
+    osmTags: { 'shop': 'supermarket' },
+    label: 'Supermarket'
+  },
+  mall: {
+    osmTags: { 'shop': 'mall' },
+    label: 'Shopping Mall'
+  },
+  marketplace: {
+    osmTags: { 'amenity': 'marketplace' },
+    label: 'Marketplace'
+  },
+  // Shared Mobility
+  bicycle_rental: {
+    osmTags: { 'amenity': 'bicycle_rental' },
+    label: 'Bike Sharing'
+  },
+  car_sharing: {
+    osmTags: { 'amenity': 'car_sharing' },
+    label: 'Car Sharing'
+  },
+  // Science & Research
+  planetarium: {
+    osmTags: { 'amenity': 'planetarium' },
+    label: 'Planetarium'
+  },
+  laboratory: {
+    osmTags: { 'man_made': 'laboratory' },
+    label: 'Laboratory'
+  },
+  // Construction
+  construction_site: {
+    osmTags: { 'landuse': 'construction' },
+    label: 'Construction Site'
+  },
+  // Food & Beverage Production
+  winery: {
+    osmTags: { 'craft': 'winery' },
+    label: 'Winery'
+  },
+  bakery: {
+    osmTags: { 'craft': 'bakery' },
+    label: 'Bakery'
+  },
+  dairy: {
+    osmTags: { 'craft': 'dairy' },
+    label: 'Dairy'
+  },
+  // Additional Transport
+  taxi_stand: {
+    osmTags: { 'amenity': 'taxi' },
+    label: 'Taxi Stand'
+  },
+  bicycle_repair: {
+    osmTags: { 'amenity': 'bicycle_repair_station' },
+    label: 'Bicycle Repair Station'
+  },
+  car_wash: {
+    osmTags: { 'amenity': 'car_wash' },
+    label: 'Car Wash'
+  },
+  // Postal & Communication
+  post_box: {
+    osmTags: { 'amenity': 'post_box' },
+    label: 'Post Box'
+  },
+  telephone: {
+    osmTags: { 'amenity': 'telephone' },
+    label: 'Public Telephone'
+  },
+  // Community
+  community_centre: {
+    osmTags: { 'amenity': 'community_centre' },
+    label: 'Community Centre'
+  },
+  social_facility: {
+    osmTags: { 'amenity': 'social_facility' },
+    label: 'Social Facility'
+  },
+  shelter: {
+    osmTags: { 'amenity': 'shelter' },
+    label: 'Shelter'
+  },
+  // Food Services
+  restaurant: {
+    osmTags: { 'amenity': 'restaurant' },
+    label: 'Restaurant'
+  },
+  cafe: {
+    osmTags: { 'amenity': 'cafe' },
+    label: 'Cafe'
+  },
+  fast_food: {
+    osmTags: { 'amenity': 'fast_food' },
+    label: 'Fast Food'
+  },
+  // Recreation
+  playground: {
+    osmTags: { 'leisure': 'playground' },
+    label: 'Playground'
+  },
+  park: {
+    osmTags: { 'leisure': 'park' },
+    label: 'Park'
+  },
+  pitch: {
+    osmTags: { 'leisure': 'pitch' },
+    label: 'Sports Pitch'
+  },
+  // Water Features
+  fountain: {
+    osmTags: { 'amenity': 'fountain' },
+    label: 'Fountain'
+  },
+  waterfall: {
+    osmTags: { 'waterway': 'waterfall' },
+    label: 'Waterfall'
+  },
+  hot_spring: {
+    osmTags: { 'natural': 'hot_spring' },
+    label: 'Hot Spring'
+  },
+  // Safety & Monitoring
+  monitoring_station: {
+    osmTags: { 'man_made': 'monitoring_station' },
+    label: 'Monitoring Station'
+  },
+  weather_station: {
+    osmTags: { 'man_made': 'weather_station' },
+    label: 'Weather Station'
   }
 };
 

@@ -9,19 +9,18 @@ Geospatial infrastructure intelligence platform for discovering and analyzing ph
 
 Sightline enables searching, monitoring, and analyzing real-world infrastructure including:
 
-- Telecommunications towers
-- Power plants and substations
-- Data centers
-- Airports and helipads
-- Ports and harbours
+- Telecommunications towers and data centers
+- Power plants, substations, and energy storage
+- Airports, helipads, and cable transport (gondolas, funiculars)
+- Ports, harbours, piers, and maritime facilities
 - Warehouses and industrial facilities
-- Buildings
-- Pipelines and refineries
+- Pipelines, refineries, and energy infrastructure
 - Military installations
-- Hospitals, prisons, embassies
-- Surveillance cameras and security infrastructure
+- Hospitals, prisons, embassies, and government facilities
+- Surveillance cameras and emergency infrastructure
+- Transportation hubs (train stations, bus stations, taxi stands)
 
-And many more asset types across 20+ categories with over 150 searchable infrastructure types.
+And many more asset types across 30+ categories with over 200 searchable infrastructure types.
 
 ## Architecture
 
@@ -109,6 +108,8 @@ type:airport country:france
 | `power_plant` | `powerplant` | Power generation facilities |
 | `substation` | - | Electrical substations |
 | `transformer` | - | Power transformers |
+| `converter` | - | Power converters |
+| `switch` | - | Power switches |
 | `power_line` | - | High voltage power lines |
 | `power_pole` | - | Power distribution poles |
 | `solar` | - | Solar farms and panels |
@@ -122,6 +123,7 @@ type:airport country:france
 | `biogas` | - | Biogas plants |
 | `biomass` | - | Biomass plants |
 | `tidal` | - | Tidal power plants |
+| `battery_storage` | - | Battery energy storage |
 
 #### Telecommunications
 | Type | Aliases | Description |
@@ -183,6 +185,11 @@ type:airport country:france
 | `shipyard` | - | Shipyards |
 | `dock` | - | Docks |
 | `lighthouse` | - | Lighthouses |
+| `pier` | - | Piers |
+| `jetty` | - | Jetties |
+| `slipway` | - | Boat slipways |
+| `mooring` | - | Moorings |
+| `boat_lift` | - | Boat lifts |
 
 #### Rail & Transit
 | Type | Aliases | Description |
@@ -307,6 +314,8 @@ type:airport country:france
 | `aquarium` | - | Aquariums |
 | `viewpoint` | - | Viewpoints |
 | `attraction` | - | Tourist attractions |
+| `information` | - | Tourist information centers |
+| `picnic_site` | - | Picnic sites |
 
 #### Religious
 | Type | Aliases | Description |
@@ -343,8 +352,105 @@ type:airport country:france
 | `bank` | - | Banks |
 | `atm` | - | ATMs |
 | `post_office` | - | Post offices |
+| `post_box` | - | Post boxes |
 | `fuel` | `gas_station`, `petrol` | Fuel stations |
 | `charging_station` | - | EV charging stations |
+| `taxi_stand` | - | Taxi stands |
+| `car_wash` | - | Car washes |
+| `bicycle_repair` | - | Bicycle repair stations |
+
+#### Public Utilities
+| Type | Aliases | Description |
+|------|---------|-------------|
+| `bicycle_parking` | - | Bicycle parking |
+| `drinking_water` | - | Drinking water fountains |
+| `public_toilet` | - | Public toilets |
+| `bench` | - | Public benches |
+| `waste_basket` | - | Waste baskets |
+| `street_lamp` | - | Street lamps |
+| `traffic_signals` | - | Traffic signals |
+| `telephone` | - | Public telephones |
+
+#### Cable Transport
+| Type | Aliases | Description |
+|------|---------|-------------|
+| `aerialway` | - | Cable cars |
+| `gondola` | - | Gondolas |
+| `funicular` | - | Funiculars |
+| `chairlift` | - | Chairlifts |
+
+#### Emergency Infrastructure (Additional)
+| Type | Aliases | Description |
+|------|---------|-------------|
+| `siren` | - | Emergency sirens |
+| `defibrillator` | - | Public defibrillators |
+| `assembly_point` | - | Emergency assembly points |
+| `life_ring` | - | Life rings |
+
+#### Commercial & Retail
+| Type | Aliases | Description |
+|------|---------|-------------|
+| `supermarket` | - | Supermarkets |
+| `mall` | - | Shopping malls |
+| `marketplace` | - | Marketplaces |
+
+#### Shared Mobility
+| Type | Aliases | Description |
+|------|---------|-------------|
+| `bicycle_rental` | - | Bike sharing stations |
+| `car_sharing` | - | Car sharing locations |
+
+#### Science & Research (Additional)
+| Type | Aliases | Description |
+|------|---------|-------------|
+| `planetarium` | - | Planetariums |
+| `laboratory` | - | Laboratories |
+
+#### Construction
+| Type | Aliases | Description |
+|------|---------|-------------|
+| `construction_site` | - | Construction sites |
+
+#### Food & Beverage Production
+| Type | Aliases | Description |
+|------|---------|-------------|
+| `winery` | - | Wineries |
+| `bakery` | - | Bakeries |
+| `dairy` | - | Dairies |
+
+#### Food Services
+| Type | Aliases | Description |
+|------|---------|-------------|
+| `restaurant` | - | Restaurants |
+| `cafe` | - | Cafes |
+| `fast_food` | - | Fast food restaurants |
+
+#### Recreation
+| Type | Aliases | Description |
+|------|---------|-------------|
+| `playground` | - | Playgrounds |
+| `park` | - | Parks |
+| `pitch` | - | Sports pitches |
+
+#### Water Features
+| Type | Aliases | Description |
+|------|---------|-------------|
+| `fountain` | - | Fountains |
+| `waterfall` | - | Waterfalls |
+| `hot_spring` | - | Hot springs |
+
+#### Monitoring & Weather
+| Type | Aliases | Description |
+|------|---------|-------------|
+| `monitoring_station` | - | Environmental monitoring |
+| `weather_station` | - | Weather stations |
+
+#### Community Facilities
+| Type | Aliases | Description |
+|------|---------|-------------|
+| `community_centre` | - | Community centres |
+| `social_facility` | - | Social facilities |
+| `shelter` | - | Public shelters |
 
 ## Development
 
@@ -419,7 +525,7 @@ This tool accesses publicly available OpenStreetMap data. Users must:
 4. Not use this tool for illegal surveillance or harmful purposes
 5. Acknowledge that OSM data may be incomplete or inaccurate
 6. Not perform bulk automated queries that overload public infrastructure
-7. Report map issues at [https://www.openstreetmap.org/fixthemap](https://www.openstreetmap.org/fixthemap)
+7. For issues regarding the map, please refer to [https://www.openstreetmap.org/fixthemap](https://www.openstreetmap.org/fixthemap)
 
 The presence or absence of infrastructure in OSM should not be taken as authoritative. Always verify critical information through official sources.
 
