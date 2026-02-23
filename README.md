@@ -419,6 +419,7 @@ This tool accesses publicly available OpenStreetMap data. Users must:
 4. Not use this tool for illegal surveillance or harmful purposes
 5. Acknowledge that OSM data may be incomplete or inaccurate
 6. Not perform bulk automated queries that overload public infrastructure
+7. Report map issues at [https://www.openstreetmap.org/fixthemap](https://www.openstreetmap.org/fixthemap)
 
 The presence or absence of infrastructure in OSM should not be taken as authoritative. Always verify critical information through official sources.
 

@@ -44,13 +44,12 @@ interface LayerConfig {
 
 const LAYERS: Readonly<Record<string, LayerConfig>> = Object.freeze({
   osm: {
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     name: "osm",
     label: "Street",
     maxZoom: 19,
-    subdomains: "abc",
   },
   satellite: {
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
@@ -372,6 +371,16 @@ export default function MapView({
     map.on("baselayerchange", handleBaseLayerChange);
 
     map.zoomControl.setPosition("topright");
+
+    // Add "Report a map issue" link control (OSM tile policy recommendation)
+    const reportControl = L.Control.extend({
+      onAdd: function() {
+        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-report');
+        container.innerHTML = '<a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer" title="Report a map issue" style="padding: 4px 8px; display: block; text-decoration: none; color: #333; background: white; font-size: 12px;">Report issue</a>';
+        return container;
+      }
+    });
+    new reportControl({ position: 'bottomleft' }).addTo(map);
 
     const handleInteractionStart = () => {
       userInteractingRef.current = true;

@@ -1,7 +1,7 @@
 import { GeoResult } from './types';
 
 const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org';
-const USER_AGENT = 'Sightline/1.0';
+const USER_AGENT = 'Sightline/1.0 (+https://github.com/ni5arga/sightline)';
 const TIMEOUT_MS = 10000;
 
 interface NominatimResponse {

@@ -8,6 +8,7 @@ const OVERPASS_APIS = [
 
 const TIMEOUT_MS = 30000;
 const MAX_RESULTS = 1000;
+const USER_AGENT = 'Sightline/1.0 (+https://github.com/ni5arga/sightline)';
 
 interface OverpassElement {
   type: 'node' | 'way' | 'relation';
@@ -137,7 +138,8 @@ export async function executeQuery(query: string): Promise<Asset[]> {
       const response = await fetchWithTimeout(apiEndpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': USER_AGENT
         },
         body: `data=${encodeURIComponent(query)}`
       }, TIMEOUT_MS);
