@@ -15,6 +15,7 @@ const TYPE_PATTERNS = [
   { pattern: /\bports?\b/i, type: 'port' },
   { pattern: /\bharbou?rs?\b/i, type: 'harbour' },
   { pattern: /\bwarehouses?\b/i, type: 'warehouse' },
+  { pattern: /\bbuildings?\b/i, type: 'building' },
   { pattern: /\bairports?\b/i, type: 'airport' },
   { pattern: /\bhelipads?\b/i, type: 'helipad' },
   { pattern: /\brail(?:way)?\s*yards?\b/i, type: 'railyard' },

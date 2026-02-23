@@ -15,6 +15,7 @@ Sightline enables searching, monitoring, and analyzing real-world infrastructure
 - Airports and helipads
 - Ports and harbours
 - Warehouses and industrial facilities
+- Buildings
 - Pipelines and refineries
 - Military installations
 - Hospitals, prisons, embassies
@@ -202,6 +203,7 @@ type:airport country:france
 #### Structures
 | Type | Aliases | Description |
 |------|---------|-------------|
+| `building` | - | General buildings |
 | `bridge` | - | Bridges |
 | `tunnel` | - | Tunnels |
 | `cooling_tower` | - | Cooling towers |

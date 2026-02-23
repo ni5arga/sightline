@@ -239,6 +239,7 @@ function extractType(tags: Record<string, string>): string {
   if (tags.amenity === 'embassy') return 'embassy';
   if (tags.waterway === 'dam') return 'dam';
   if (tags.building === 'industrial') return 'factory';
+  if (tags.building) return 'building';
   
   return 'infrastructure';
 }

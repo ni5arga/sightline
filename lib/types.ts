@@ -99,6 +99,10 @@ export const ASSET_TYPE_MAP: Record<string, { osmTags: Record<string, string | s
     osmTags: { 'building': 'warehouse' },
     label: 'Warehouse'
   },
+  building: {
+    osmTags: { 'building': 'yes' },
+    label: 'Building'
+  },
   airport: {
     osmTags: { 'aeroway': 'aerodrome' },
     label: 'Airport'

@@ -89,6 +89,7 @@ const ASSET_TYPES_RAW: readonly { keyword: string; label: string }[] = [
   { keyword: "chimneys", label: "Chimneys" },
   { keyword: "cranes", label: "Cranes" },
   { keyword: "warehouses", label: "Warehouses" },
+  { keyword: "buildings", label: "Buildings" },
   { keyword: "factories", label: "Factories" },
   { keyword: "industrial zones", label: "Industrial Zones" },
   { keyword: "breweries", label: "Breweries" },
