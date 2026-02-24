@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getPlaceSuggestions } from "@/lib/geo";
 import type { SearchableAsset, Keyword } from "@/lib/search-index";
 import {
   findMatchedAssetType,
@@ -20,8 +21,9 @@ interface SearchBarProps {
 
 interface Suggestion {
   text: string;
-  type: "asset" | "keyword" | "example";
+  type: "asset" | "keyword" | "example" | "place";
   description?: string;
+  fullText?: string; 
 }
 
 /**
@@ -37,11 +39,16 @@ export default function SearchBar({
   const [showExamples, setShowExamples] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [placeSuggestions, setPlaceSuggestions] = useState<Array<{ name: string; displayName: string }>>([]);
+  const [loadingPlaces, setLoadingPlaces] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const prevInitialQueryRef = useRef(initialQuery);
   const hasUserInteracted = useRef(false);
+  const placeDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const placeAbortControllerRef = useRef<AbortController | null>(null);
+  const placeCacheRef = useRef<Map<string, Array<{ name: string; displayName: string }>>>(new Map());
 
   useEffect(() => {
     if (initialQuery && initialQuery !== prevInitialQueryRef.current) {
@@ -52,6 +59,67 @@ export default function SearchBar({
       queueMicrotask(() => setQuery(initialQuery));
     }
   }, [initialQuery, query]);
+
+  // Fetch place suggestions when user types after "in" or "near"
+  useEffect(() => {
+    // Clear previous timer
+    if (placeDebounceTimerRef.current) {
+      clearTimeout(placeDebounceTimerRef.current);
+    }
+
+    // Abort previous request
+    if (placeAbortControllerRef.current) {
+      placeAbortControllerRef.current.abort();
+    }
+
+    const lowerQuery = query.toLowerCase().trim();
+    
+    // Check if query contains "in" or "near" pattern with place name
+    const inMatch = lowerQuery.match(/\b(?:in|near)\s+(.+)$/);
+    
+    if (!inMatch || inMatch[1].length < 3) {
+      setPlaceSuggestions([]);
+      return;
+    }
+
+    const placeQuery = inMatch[1].trim();
+    
+    // Check cache first
+    const cached = placeCacheRef.current.get(placeQuery);
+    if (cached) {
+      setPlaceSuggestions(cached);
+      return;
+    }
+    
+    // Debounce the API call - increased to 1500ms to respect Nominatim rate limit (1 req/sec)
+    placeDebounceTimerRef.current = setTimeout(async () => {
+      setLoadingPlaces(true);
+      placeAbortControllerRef.current = new AbortController();
+      
+      try {
+        const suggestions = await getPlaceSuggestions(placeQuery, 5);
+        setPlaceSuggestions(suggestions);
+        // Cache the results
+        placeCacheRef.current.set(placeQuery, suggestions);
+      } catch (error) {
+        if (error instanceof Error && error.name !== 'AbortError') {
+          console.warn('Failed to fetch place suggestions:', error);
+        }
+        setPlaceSuggestions([]);
+      } finally {
+        setLoadingPlaces(false);
+      }
+    }, 1500); // 1500ms debounce for Nominatim rate limit
+
+    return () => {
+      if (placeDebounceTimerRef.current) {
+        clearTimeout(placeDebounceTimerRef.current);
+      }
+      if (placeAbortControllerRef.current) {
+        placeAbortControllerRef.current.abort();
+      }
+    };
+  }, [query]);
 
   const suggestions = useMemo((): Suggestion[] => {
     if (!query.trim()) return [];
@@ -64,6 +132,27 @@ export default function SearchBar({
       lastColonIndex !== -1 && !query.slice(lastColonIndex).includes(" ");
 
     const matchedAssetType = findMatchedAssetType(lowerQuery);
+
+    // Check if user is typing a location after "in" or "near"
+    const locationMatch = lowerQuery.match(/\b(?:in|near)\s+(.+)$/);
+    
+    // If we have place suggestions, add them first
+    if (locationMatch && placeSuggestions.length > 0) {
+      const beforeLocation = query.slice(0, query.toLowerCase().lastIndexOf(locationMatch[0]));
+      const locationKeyword = locationMatch[0].startsWith('in') ? 'in' : 'near';
+      
+      placeSuggestions.forEach((place) => {
+        results.push({
+          text: place.name, // Show just the place name
+          fullText: `${beforeLocation}${locationKeyword} ${place.name}`, // Store full query
+          type: "place",
+          description: place.displayName,
+        });
+      });
+      
+      // Return early with just place suggestions to avoid clutter
+      return results.slice(0, 8);
+    }
 
     if (matchedAssetType) {
       const afterAsset = lowerQuery
@@ -138,13 +227,14 @@ export default function SearchBar({
 
     const seen = new Set<string>();
     const uniqueResults = results.filter((item) => {
-      if (seen.has(item.text)) return false;
-      seen.add(item.text);
+      const key = item.fullText || item.text;
+      if (seen.has(key)) return false;
+      seen.add(key);
       return true;
     });
 
     return uniqueResults.slice(0, 8);
-  }, [query]);
+  }, [query, placeSuggestions]);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -170,13 +260,15 @@ export default function SearchBar({
 
   const handleSuggestionClick = useCallback(
     (suggestion: Suggestion) => {
-      setQuery(suggestion.text);
+      // Use fullText for place suggestions, otherwise use text
+      const queryText = suggestion.fullText || suggestion.text;
+      setQuery(queryText);
       setShowSuggestions(false);
       setSelectedIndex(-1);
       inputRef.current?.focus();
 
-      if (suggestion.type === "example") {
-        onSearch(suggestion.text);
+      if (suggestion.type === "example" || suggestion.type === "place") {
+        onSearch(queryText);
       }
     },
     [onSearch],
@@ -190,6 +282,13 @@ export default function SearchBar({
       setShowSuggestions(value.trim().length > 0);
       setShowExamples(false);
       setSelectedIndex(-1);
+      
+      // Clear place suggestions if not typing after "in" or "near"
+      const lowerValue = value.toLowerCase().trim();
+      const locationMatch = lowerValue.match(/\b(?:in|near)\s+(.+)$/);
+      if (!locationMatch || locationMatch[1].length < 3) {
+        setPlaceSuggestions([]);
+      }
     },
     [],
   );
@@ -369,7 +468,14 @@ export default function SearchBar({
 
       {showSuggestions && suggestions.length > 0 && (
         <div ref={suggestionsRef} className="search-suggestions">
-          <div className="suggestions-header">Suggestions</div>
+          <div className="suggestions-header">
+            {suggestions[0]?.type === "place" ? "Places" : "Suggestions"}
+            {loadingPlaces && suggestions[0]?.type === "place" && (
+              <span style={{ marginLeft: "8px", fontSize: "12px", opacity: 0.6 }}>
+                Loading...
+              </span>
+            )}
+          </div>
           <ScrollArea className="suggestions-scroll-area">
             <div className="suggestions-list">
               {suggestions.map((suggestion, idx) => (
@@ -395,6 +501,11 @@ export default function SearchBar({
                           fillRule="evenodd"
                           d="M11.5 7a4.499 4.499 0 11-8.998 0 4.499 4.499 0 018.998 0zm-.82 4.74a6 6 0 111.06-1.06l3.04 3.04a.75.75 0 11-1.06 1.06l-3.04-3.04z"
                         />
+                      </svg>
+                    )}
+                    {suggestion.type === "place" && (
+                      <svg viewBox="0 0 16 16" fill="currentColor">
+                        <path fillRule="evenodd" d="M11.536 3.464a5 5 0 010 7.072L8 14.07l-3.536-3.535a5 5 0 117.072-7.072v.001zm1.06 8.132a6.5 6.5 0 10-9.192 0l3.535 3.536a1.5 1.5 0 002.122 0l3.535-3.536zM8 9a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                       </svg>
                     )}
                     {suggestion.type === "example" && (
