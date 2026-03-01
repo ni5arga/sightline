@@ -1,8 +1,5 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# GitHub configuration (local only)
-.github/
-
 # Agent skills (local only)
 .agents/
 
@@ -83,5 +80,4 @@ logs
 /data/
 *.geojson
 *.osm
-/.github/
 skills/
