@@ -65,7 +65,7 @@ export function buildOverpassQuery(
 
   const osmTagsArray = Array.isArray(typeConfig.osmTags) ? typeConfig.osmTags : [typeConfig.osmTags];
   
-  let unionParts: string[] = [];
+  const unionParts: string[] = [];
   for (const osmTags of osmTagsArray) {
     const tagFilter = buildTagFilter(osmTags);
     unionParts.push(`  node${tagFilter}${operatorFilter}${locationFilter};`);

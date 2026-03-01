@@ -59,7 +59,7 @@ export default function AssetInfoModal({
             timestamp: element.timestamp,
           });
         }
-      } catch (err) {
+      } catch {
         setError("Could not load metadata");
       } finally {
         setLoading(false);
