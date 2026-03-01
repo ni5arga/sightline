@@ -26,33 +26,43 @@ And many more asset types across 30+ categories with over 200 searchable infrast
 
 ```mermaid
 flowchart TB
-    subgraph Frontend
-        SearchBar
-        Filters
-        ResultList
-        MapView["MapView (Leaflet.js)"]
+    classDef frontend fill:#6366f1,stroke:#4338ca,color:#fff
+    classDef backend fill:#0ea5e9,stroke:#0284c7,color:#fff
+    classDef external fill:#f59e0b,stroke:#d97706,color:#fff
+
+    subgraph FE["Frontend"]
+        SearchBar["SearchBar"]
+        Filters["Filters"]
+        ResultList["ResultList"]
+        MapView["MapView — Leaflet.js"]
     end
 
-    subgraph Backend
-        route["route.ts"]
-        parser["parser.ts (NLP)"]
-        geo["geo.ts (Nominatim)"]
-        overpass["overpass.ts (OSM)"]
-        cache["cache.ts"]
+    subgraph BE["Backend"]
+        route["route.ts — Request Handler"]
+        parser["parser.ts — NLP Engine"]
+        geo["geo.ts — Geocoding"]
+        overpass["overpass.ts — OSM Query Builder"]
+        cache["cache.ts — Cache Layer"]
     end
 
-    subgraph External["External APIs"]
-        Nominatim["Nominatim (Geocoding)"]
-        OverpassAPI["Overpass API (OSM Data)"]
+    subgraph EX["External APIs"]
+        Nominatim["Nominatim — Geocoding API"]
+        OverpassAPI["Overpass API — OSM Data"]
     end
 
-    Frontend -->|POST /api/search| route
-    route --> parser
-    route --> geo
-    route --> overpass
-    route --> cache
-    geo --> Nominatim
-    overpass --> OverpassAPI
+    SearchBar & Filters & ResultList & MapView -->|"POST /api/search"| route
+
+    route -->|"parse query"| parser
+    route -->|"resolve location"| geo
+    route -->|"fetch POIs"| overpass
+    route <-->|"read / write"| cache
+
+    geo -->|"geocode"| Nominatim
+    overpass -->|"QL query"| OverpassAPI
+
+    class SearchBar,Filters,ResultList,MapView frontend
+    class route,parser,geo,overpass,cache backend
+    class Nominatim,OverpassAPI external
 ```
 
 ## Data Sources
